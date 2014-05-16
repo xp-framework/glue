@@ -12,26 +12,27 @@ use lang\reflect\Package;
  */
 class Install extends Command {
   const PW = 10;
+  protected $sources= [];
 
-  public function execute(array $args) {
-    $sources= [];
+  public function configure(Properties $conf) {
+    parent::configure($conf);
+    $this->sources= [];
     foreach ($this->conf->readSection('sources')['source'] as $name => $url) {
       sscanf($name, '%[^@]@%s', $impl, $spec);
-      $sources[$name]= Package::forName('xp.glue.src')->loadClass(ucfirst($impl))->newInstance($url);
+      $this->sources[$name]= Package::forName('xp.glue.src')->loadClass(ucfirst($impl))->newInstance($url);
     }
+  }
 
-    $project= self::$json->decodeFrom((new File('glue.json'))->getInputStream());
-    $cwd= new Folder('.');
-    $pth= (new File('glue.pth'))->getOutputStream();
-    $libs= new Folder($cwd, 'vendor');
-    $dependencies= $project['require'];
-    foreach ($dependencies as $dependency => $version) {
-      $line= '[>>> '.str_repeat('.', self::PW).'] '.$dependency.' @ '.$version;
+  protected function fetch(Folder $libs, $dependencies) {
+    $paths= [];
+
+    // Don't use foreach() here as that doesn't allow modification during iteration
+    while (list($module, $dependency)= each($dependencies)) {
+      $line= '[>>> '.str_repeat('.', self::PW).'] '.$module.' @ '.$dependency['version'];
       Console::write($line);
 
-      sscanf($dependency, "%[^/]/%[^\r]", $vendor, $lib);
-      foreach ($sources as $name => $source) {
-        if (null !== ($remote= $source->fetch($vendor, $lib, $version))) {
+      foreach ($this->sources as $name => $source) {
+        if (null !== ($remote= $source->fetch($dependency['vendor'], $dependency['name'], $dependency['version']))) {
           Console::writef(
             ": %s %s%s[\033[44;1;37m200\033[0m ",
             $name,
@@ -42,8 +43,6 @@ class Install extends Command {
           // Prepare output folder
           $folder= new Folder($libs, $vendor);
           $folder->exists() || $folder->create(0755);
-
-
 
           // Perform tasks
           $step= floor(self::PW / sizeof($remote['tasks']));
@@ -67,10 +66,21 @@ class Install extends Command {
               $in->close();
               $out->close();
             }
-
-            $pth->write(str_replace(DIRECTORY_SEPARATOR, '/', substr($target->getURI(), strlen($cwd->getURI())))."\n");
+            $paths[]= $target->getURI();
           }
           Console::writeLine();
+
+          // Register dependencies
+          foreach ($remote['project']['libs'] as $lib) {
+            $key= $lib['vendor'].'/'.$lib['name'];
+            if (isset($dependencies[$key])) {
+
+              // TODO: Check for conflicts!
+              continue;
+            }
+
+            $dependencies[$key]= $lib;
+          }
           continue 2;
         }
       }
@@ -80,5 +90,29 @@ class Install extends Command {
         str_repeat("\x08", strlen($line))
       );
     }
+    return $paths;
+  }
+
+  public function execute(array $args) {
+    $project= self::$json->decodeFrom((new File('glue.json'))->getInputStream());
+    $cwd= new Folder('.');
+
+    $dependencies= [];
+    foreach ($project['require'] as $module => $version) {
+      sscanf($module, "%[^/]/%[^\r]", $vendor, $name);
+      $dependencies[$module]= [
+        'vendor'  => $vendor,
+        'name'    => $name,
+        'version' => $version
+      ];
+    }
+
+    $paths= $this->fetch(new Folder($cwd, 'vendor'), $dependencies);
+
+    $pth= (new File($cwd, 'glue.pth'))->getOutputStream();
+    foreach ($paths as $path) {
+      $pth->write(str_replace(DIRECTORY_SEPARATOR, '/', substr($path, strlen($cwd->getURI())))."\n");
+    }
+    $pth->close();
   }
 }

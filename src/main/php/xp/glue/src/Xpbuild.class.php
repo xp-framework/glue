@@ -70,7 +70,7 @@ class Xpbuild extends Source {
 
     $project= [
       'vendor'  => $module['vendor'],
-      'name'    => $module['name'],
+      'name'    => $module['module'],
       'version' => $release,
       'libs'    => [],
     ];
