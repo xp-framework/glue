@@ -81,7 +81,7 @@ class Install extends Command {
             }
 
             $dependencies[$key]= $dependency;
-            Console::writeLine('`- ', $key, ' @ ', $dependency->required());
+            // DEBUG Console::writeLine('`- ', $key, ' @ ', $dependency->required());
           }
           continue 2;
         }
