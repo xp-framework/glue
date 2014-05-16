@@ -1,0 +1,14 @@
+#!/bin/sh
+
+if [ "init" = "$1" ]; then
+  for pth in `ls -1 *.pth 2>/dev/null` ; do
+    mv $pth $pth.in
+  done
+fi
+
+DIR=$(dirname "$0")
+if [ "Windows_NT" = "$OS" ]; then
+  DIR=$(cygpath -m "$DIR")
+fi
+
+xp -cp "$DIR" -cp "$DIR/src/main/php" xp.glue.Glue "$@"
