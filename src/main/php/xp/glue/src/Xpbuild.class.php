@@ -20,13 +20,15 @@ class Xpbuild extends Source {
   }
 
   protected function select($releases, $spec) {
+    uksort($releases, function($a, $b) {
+      return version_compare($a, $b, '<');
+    });
+
     if ('*' === $spec) {
       return key($releases);
     } else {
       foreach ($releases as $release => $info) {
-        if (0 === version_compare($spec, $release, 'eq')) {
-          return $version;
-        }
+        if (version_compare($spec, $release, 'eq')) return $release;
       }
     }
     return null;
@@ -38,32 +40,40 @@ class Xpbuild extends Source {
       ->withSegment('module', $name)
     );
 
-    if (200 === $res->status()) {
-      $releases= $res->data()['releases'];
-      uksort($releases, function($a, $b) {
-        return version_compare($a, $b, '<');
-      });
+    if (200 !== $res->status()) return null;
 
-      if ($release= $this->select($releases, $spec)) {
-        $res= $this->rest->execute((new RestRequest('/vendors/{vendor}/modules/{module}/releases/{release}'))
-          ->withSegment('vendor', $vendor)
-          ->withSegment('module', $name)
-          ->withSegment('release', $release)
-        );
-        $info= $res->data()['files'][0];
-        $base= $this->rest->getBase();
-        $file= (new HttpConnection($base->setPath($info['link'])))->get();
-        if (200 === $file->statusCode()) return new Download(
-          $file->getInputStream(),
-          $info['name'],
-          $info['size'],
-          $info['sha1']
-        );
-            
-        throw new \lang\IllegalStateException('Download link broken '.$file->toString());
-      }
+    $module= $res->data();
+    if (!($release= $this->select($module['releases'], $spec))) {
+
+      // Has the module, but not the correct version
+      return null;
     }
 
-    return null;
+    $tasks= [];
+    $res= $this->rest->execute((new RestRequest('/vendors/{vendor}/modules/{module}/releases/{release}'))
+      ->withSegment('vendor', $vendor)
+      ->withSegment('module', $name)
+      ->withSegment('release', $release)
+    );
+    $base= $this->rest->getBase();
+    foreach ($res->data()['files'] as $info) {
+      if (!strstr($info['name'], '.xar')) continue;
+
+      $file= (new HttpConnection($base->setPath($info['link'])))->get();
+      $tasks[]= new Download(
+        $file->getInputStream(),
+        $info['name'],
+        $info['size'],
+        $info['sha1']
+      );
+    }
+
+    $project= [
+      'vendor'  => $module['vendor'],
+      'name'    => $module['name'],
+      'version' => $release,
+      'libs'    => [],
+    ];
+    return ['project' => $project, 'tasks' => $tasks];
   }
 }
