@@ -4,11 +4,11 @@ This tool glues together XP Framework projects. It depends on a `glue.json` file
 
 ```json
 {
-  "name"    : "thekid\/dialog",
+  "name"    : "thekid/dialog",
   "version" : "4.0.0",
   "require" : {
-    "xp-forge\/mustache" : "1.2+",
-    "xp-framework\/core" : "5.9~"
+    "xp-forge/mustache" : "1.2+",
+    "xp-framework/core" : "5.9~"
   }
 }
 ```
