@@ -1,8 +1,6 @@
 <?php namespace xp\glue\command;
 
 use xp\glue\input\MavenPOM;
-use xml\XPath;
-use xml\Tree;
 use io\File;
 use util\cmd\Console;
 
