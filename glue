@@ -6,9 +6,11 @@ if [ "init" = "$1" ]; then
   done
 fi
 
+GLUE=$(dirname "$(realpath "$0")")
 DIR=$(dirname "$0")
 if [ "Windows_NT" = "$OS" ]; then
+  GLUE=$(cygpath -m "$GLUE")
   DIR=$(cygpath -m "$DIR")
 fi
 
-xp -cp "$DIR" -cp "$DIR/src/main/php" xp.glue.Glue "$@"
+xp -cp "$DIR" -cp "$GLUE/src/main/php" xp.glue.Glue "$@"
