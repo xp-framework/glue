@@ -42,7 +42,7 @@ class Install extends Command {
           );
 
           // Prepare output folder
-          $folder= new Folder($libs, $vendor);
+          $folder= new Folder($libs, $dependency->vendor());
           $folder->exists() || $folder->create(0755);
 
           // Perform tasks
@@ -110,6 +110,22 @@ class Install extends Command {
   }
 
   /**
+   * Creates a .pth file
+   *
+   * @param  io.File $file
+   * @param  io.Folder $base
+   * @param  string[] $paths
+   * @return void
+   */
+  protected function createPathFile($file, $base, array $paths) {
+    $pth= $file->getOutputStream();
+    foreach ($paths as $path) {
+      $pth->write(str_replace(DIRECTORY_SEPARATOR, '/', substr($path, strlen($base->getURI())))."\n");
+    }
+    $pth->close();
+  }
+
+  /**
    * Execute this action
    *
    * @param  string[] $args
@@ -117,12 +133,10 @@ class Install extends Command {
   public function execute(array $args) {
     $cwd= new Folder('.');
     $project= (new GlueFile())->parse((new File($cwd, 'glue.json'))->getInputStream());
-
-    $paths= $this->fetch(new Folder($cwd, 'vendor'), $this->dependencyLookupOf($project->dependencies()));
-    $pth= (new File($cwd, 'glue.pth'))->getOutputStream();
-    foreach ($paths as $path) {
-      $pth->write(str_replace(DIRECTORY_SEPARATOR, '/', substr($path, strlen($cwd->getURI())))."\n");
-    }
-    $pth->close();
+    $this->createPathFile(
+      new File($cwd, 'glue.pth'),
+      $cwd,
+      $this->fetch(new Folder($cwd, 'vendor'), $this->dependencyLookupOf($project->dependencies()))
+    );
   }
 }
