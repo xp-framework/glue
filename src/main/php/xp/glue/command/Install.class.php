@@ -6,6 +6,7 @@ use util\cmd\Console;
 use util\Properties;
 use webservices\json\JsonFactory;
 use lang\reflect\Package;
+use xp\glue\input\GlueFile;
 
 /**
  * Install: Downloads dependencies
@@ -28,16 +29,16 @@ class Install extends Command {
 
     // Don't use foreach() here as that doesn't allow modification during iteration
     while (list($module, $dependency)= each($dependencies)) {
-      $line= '[>>> '.str_repeat('.', self::PW).'] '.$module.' @ '.$dependency['version'];
+      $line= '[>>> '.str_repeat('.', self::PW).'] '.$module.' @ '.$dependency->required();
       Console::write($line);
 
       foreach ($this->sources as $name => $source) {
-        if (null !== ($remote= $source->fetch($dependency['vendor'], $dependency['name'], $dependency['version']))) {
+        if (null !== ($remote= $source->fetch($dependency->vendor(), $dependency->name(), $dependency->required()))) {
           Console::writef(
             ": %s %s%s[\033[44;1;37m200\033[0m ",
             $name,
-            $remote['project']['version'],
-            str_repeat("\x08", strlen($line) + strlen($name) + 1 + strlen($remote['project']['version'])+ 2)
+            $remote['project']->version(),
+            str_repeat("\x08", strlen($line) + strlen($name) + 1 + strlen($remote['project']->version())+ 2)
           );
 
           // Prepare output folder
@@ -71,15 +72,16 @@ class Install extends Command {
           Console::writeLine();
 
           // Register dependencies
-          foreach ($remote['project']['libs'] as $lib) {
-            $key= $lib['vendor'].'/'.$lib['name'];
+          foreach ($remote['project']->dependencies() as $dependency) {
+            $key= $dependency->vendor().'/'.$dependency->name();
             if (isset($dependencies[$key])) {
 
               // TODO: Check for conflicts!
               continue;
             }
 
-            $dependencies[$key]= $lib;
+            $dependencies[$key]= $dependency;
+            Console::writeLine('`- ', $key, ' @ ', $dependency->required());
           }
           continue 2;
         }
@@ -93,22 +95,30 @@ class Install extends Command {
     return $paths;
   }
 
-  public function execute(array $args) {
-    $project= self::$json->decodeFrom((new File('glue.json'))->getInputStream());
-    $cwd= new Folder('.');
-
-    $dependencies= [];
-    foreach ($project['require'] as $module => $version) {
-      sscanf($module, "%[^/]/%[^\r]", $vendor, $name);
-      $dependencies[$module]= [
-        'vendor'  => $vendor,
-        'name'    => $name,
-        'version' => $version
-      ];
+  /**
+   * Creates a key/value lookup map from a given list of dependencies
+   *
+   * @param  xp.glue.Dependency[] $dependencies
+   * @return [:xp.glue.Dependency] lookup map, keyed by $VENDOR/$NAME
+   */
+  protected function dependencyLookupOf($dependencies) {
+    $lookup= [];
+    foreach ($dependencies as $dependency) {
+      $lookup[$dependency->vendor().'/'.$dependency->name()]= $dependency;
     }
+    return $lookup;
+  }
 
-    $paths= $this->fetch(new Folder($cwd, 'vendor'), $dependencies);
+  /**
+   * Execute this action
+   *
+   * @param  string[] $args
+   */
+  public function execute(array $args) {
+    $cwd= new Folder('.');
+    $project= (new GlueFile())->parse((new File($cwd, 'glue.json'))->getInputStream());
 
+    $paths= $this->fetch(new Folder($cwd, 'vendor'), $this->dependencyLookupOf($project->dependencies()));
     $pth= (new File($cwd, 'glue.pth'))->getOutputStream();
     foreach ($paths as $path) {
       $pth->write(str_replace(DIRECTORY_SEPARATOR, '/', substr($path, strlen($cwd->getURI())))."\n");

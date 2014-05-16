@@ -5,6 +5,8 @@ use xml\parser\StreamInputSource;
 use xml\XPath;
 use xml\Tree;
 use io\streams\InputStream;
+use xp\glue\Project;
+use xp\glue\Dependency;
 
 class MavenPOM extends \lang\Object {
   protected $parser;
@@ -27,21 +29,21 @@ class MavenPOM extends \lang\Object {
     $pom->context->registerNamespace('pom', 'http://maven.apache.org/POM/4.0.0');
     $textOf= function($node, $child) use($pom) { return $pom->query($child, $node)->item(0)->textContent; };
 
-    $project= [
-      'vendor'  => $textOf($pom->document, 'pom:groupId'),
-      'name'    => $textOf($pom->document, 'pom:artifactId'),
-      'version' => strtr($textOf($pom->document, 'pom:version'), ['-SNAPSHOT' => '']),
-      'libs'    => []
-    ];
-
+    $dependencies= [];
     foreach ($pom->query('/pom:project/pom:dependencies/pom:dependency') as $dep) {
-      $project['libs'][]= [
-        'vendor'  => $textOf($dep, 'pom:groupId'),
-        'name'    => $textOf($dep, 'pom:artifactId').($classifier ? '-'.$classifier : ''),
-        'version' => $textOf($dep, 'pom:version')
-      ];
+      $classifier= $textOf($dep, 'pom:classifier');
+      $dependencies[]= new Dependency(
+        $textOf($dep, 'pom:groupId'),
+        $textOf($dep, 'pom:artifactId').($classifier ? '-'.$classifier : ''),
+        $textOf($dep, 'pom:version')
+      );
     }
 
-    return $project;
+    return new Project(
+      $textOf($pom->document, 'pom:groupId'),
+      $textOf($pom->document, 'pom:artifactId'),
+      strtr($textOf($pom->document, 'pom:version'), ['-SNAPSHOT' => '']),
+      $dependencies
+    );
   }
 }
