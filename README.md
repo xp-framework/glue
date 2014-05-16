@@ -18,7 +18,7 @@ To fetch the dependencies, simply run Glue's *install* command:
 ```sh
 $ glue install
 [200 ##########] xp-forge/mustache @ 1.2+: xpbuild@public 1.2.0
-[200 ##########] xp-framework/core @ 5.9~: xpbuild@public 5.9.11
+[200 ##########] xp-framework/core @ 5.9~: checkout@local 5.9.11
 ```
 
 This will fetch the libraries according to the dependency information, place them inside the current directory and adjust the class path accordingly.
