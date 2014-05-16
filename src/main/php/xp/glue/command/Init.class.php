@@ -2,15 +2,26 @@
 
 use xp\glue\input\MavenPOM;
 use io\File;
+use io\Folder;
 use util\cmd\Console;
 
 /**
- * Init: Transforms Maven projects to glue
+ * Init: Transforms existing projects to glue
  */
 class Init extends Command {
 
   public function execute(array $args) {
-    $project= (new MavenPOM())->parse((new File('pom.xml'))->getInputStream());
+    if (file_exists('pom.xml')) {
+      $project= (new MavenPOM())->parse((new File('pom.xml'))->getInputStream());
+      Console::writeLine('Importing Maven POM ', $project);
+    } else {
+      $project= [
+        'vendor'  => \lang\System::getProperty('user.name'),
+        'name'    => (new Folder('.'))->dirname,
+        'version' => '0.0.1'
+      ];
+      Console::writeLine('Creating empty project ', $project);
+    }
 
     // Not using JSON encoder since we want to pretty-print
     $target= new File('glue.json');
