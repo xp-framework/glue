@@ -64,16 +64,12 @@ class Download extends Task {
     $bytes= $this->size();
     
     with ($in= $this->stream(), $out= $target->getOutputStream()); {
-      $c= 0; $progress= 0;
+      $c= 0; $read= 0;
       while ($in->available()) {
         $chunk= $in->read();
-        $progress+= strlen($chunk);
+        $read+= strlen($chunk);
         $out->write($chunk);
-    
-        $d= ceil(($progress / $bytes) * $step);
-        if ($d == $c) continue;
-        $progress($d - $c);
-        $c= $d;
+        $progress($read / $bytes);
       }
     
       $in->close();

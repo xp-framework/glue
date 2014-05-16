@@ -26,6 +26,7 @@ class GlueFile extends \lang\Object {
       throw new \lang\FormatException('Cannot parse '.$source, $e);
     }
 
+    $dependencies= [];
     foreach ($config['require'] as $module => $required) {
       sscanf($module, "%[^/]/%[^\r]", $vendor, $name);
       $dependencies[]= new Dependency($vendor, $name, $required);

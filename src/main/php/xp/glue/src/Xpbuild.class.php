@@ -68,12 +68,7 @@ class Xpbuild extends Source {
       );
     }
 
-    $project= [
-      'vendor'  => $module['vendor'],
-      'name'    => $module['module'],
-      'version' => $release,
-      'libs'    => [],
-    ];
+    $project= new Project($module['vendor'], $module['module'], $release, []);
     return ['project' => $project, 'tasks' => $tasks];
   }
 }

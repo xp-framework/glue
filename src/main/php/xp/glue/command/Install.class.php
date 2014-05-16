@@ -41,14 +41,26 @@ class Install extends Command {
             str_repeat("\x08", strlen($line) + strlen($name) + 1 + strlen($remote['project']->version())+ 2)
           );
 
+          $step= self::PW / sizeof($remote['tasks']);
+          $progress= function($percent, $full) {
+            static $current= 0.0;
+            $done= ceil($percent * $full);
+            if ($done != $current) {
+              Console::write(str_repeat('#', $done - $current));
+              $current= $done;
+            }
+          };
+
           // Perform tasks
-          $step= floor(self::PW / sizeof($remote['tasks']));
           $vendor= new Folder($libs, $dependency->vendor());
-          foreach ($remote['tasks'] as $task) {
-            $paths[]= $task->perform($dependency, $vendor, function($progress) {
-              Console::write(str_repeat('#', $progress));
-            });
+          foreach ($remote['tasks'] as $i => $task) {
+            $paths[]= $task->perform(
+              $dependency,
+              $vendor,
+              function($percent) use($progress, $i, $step) { $progress($percent, $i * $step); }
+            );
           }
+          $progress(1.0, self::PW);
           Console::writeLine();
 
           // Register dependencies
@@ -90,17 +102,23 @@ class Install extends Command {
   }
 
   /**
-   * Creates a .pth file
+   * Creates a .pth file. Uses relative path entries whenever possible.
    *
    * @param  io.File $file
-   * @param  io.Folder $base
+   * @param  io.Folder $cwd
    * @param  string[] $paths
    * @return void
    */
-  protected function createPathFile($file, $base, array $paths) {
+  protected function createPathFile($file, $cwd, array $paths) {
     $pth= $file->getOutputStream();
+    $base= $cwd->getURI();
     foreach ($paths as $path) {
-      $pth->write(str_replace(DIRECTORY_SEPARATOR, '/', substr($path, strlen($base->getURI())))."\n");
+      if (0 === substr_compare($base, $path, 0, strlen($base))) {
+        $entry= str_replace(DIRECTORY_SEPARATOR, '/', substr($path, strlen($base)));
+      } else {
+        $entry= $path;
+      }
+      $pth->write($entry."\n");
     }
     $pth->close();
   }
