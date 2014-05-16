@@ -4,7 +4,7 @@ use webservices\rest\RestClient;
 use webservices\rest\RestRequest;
 use peer\http\HttpConnection;
 use peer\URL;
-use xp\glue\Download;
+use xp\glue\task\Download;
 
 /**
  * XP Build System source

@@ -4,7 +4,7 @@ use webservices\rest\RestClient;
 use webservices\rest\RestRequest;
 use peer\http\HttpConnection;
 use peer\URL;
-use xp\glue\Download;
+use xp\glue\task\Download;
 use xp\glue\input\MavenPOM;
 
 /**
@@ -13,12 +13,24 @@ use xp\glue\input\MavenPOM;
 class Artifactory extends Source {
   protected $rest;
 
+  /**
+   * Creates a new instance
+   *
+   * @param  string $base URL to artifactory (including, if necessary, auth)
+   */
   public function __construct($base) {
     $this->rest= new RestClient($base);
     // $this->rest->setTrace((new \util\log\LogCategory(''))->withAppender(new \util\log\ConsoleAppender()));
   }
 
-  public function relativeUri(URL $base, $uri) {
+  /**
+   * Creates relative URL
+   *
+   * @param  peer.URL $base
+   * @param  string $uri
+   * @return string
+   */
+  protected function relativeUri(URL $base, $uri) {
     return substr((new URL($uri))->getPath(), strlen($base->getPath()));
   }
 

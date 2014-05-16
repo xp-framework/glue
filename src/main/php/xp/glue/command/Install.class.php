@@ -41,33 +41,13 @@ class Install extends Command {
             str_repeat("\x08", strlen($line) + strlen($name) + 1 + strlen($remote['project']->version())+ 2)
           );
 
-          // Prepare output folder
-          $folder= new Folder($libs, $dependency->vendor());
-          $folder->exists() || $folder->create(0755);
-
           // Perform tasks
           $step= floor(self::PW / sizeof($remote['tasks']));
-          foreach ($remote['tasks'] as $download) {   // XXX: May be local-link task
-            $target= new File($folder, $download->file());
-            $bytes= $download->size();
-
-            with ($in= $download->stream(), $out= $target->getOutputStream()); {
-              $c= 0; $progress= 0;
-              while ($in->available()) {
-                $chunk= $in->read();
-                $progress+= strlen($chunk);
-                $out->write($chunk);
-
-                $d= ceil(($progress / $bytes) * $step);
-                if ($d == $c) continue;
-                Console::write(str_repeat('#', $d- $c));
-                $c= $d;
-              }
-
-              $in->close();
-              $out->close();
-            }
-            $paths[]= $target->getURI();
+          $vendor= new Folder($libs, $dependency->vendor());
+          foreach ($remote['tasks'] as $task) {
+            $paths[]= $task->perform($dependency, $vendor, function($progress) {
+              Console::write(str_repeat('#', $progress));
+            });
           }
           Console::writeLine();
 
