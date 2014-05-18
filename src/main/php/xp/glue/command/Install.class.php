@@ -155,8 +155,8 @@ class Install extends Command {
    * @param  string[] $args
    */
   public function execute(array $args) {
-    $t= new Timer();
-    $t->start();
+    $timer= new Timer();
+    $timer->start();
 
     $cwd= new Folder('.');
     $project= (new GlueFile())->parse((new File($cwd, 'glue.json'))->getInputStream());
@@ -177,13 +177,12 @@ class Install extends Command {
     } catch (\lang\Throwable $t) {
       $result= function() use($t) {
         $error= explode("\n", $t->toString(), 2);
-        Console::writeLinef("\n\033[41;1;37mFAIL: %s\033[0m", $error[0]);
-        Console::writeLine($error[1]);
+        Console::writeLinef("\n\033[41;1;37mFAIL: %s\033[0m\n%s", $error[0], $error[1]);
         return 1;
       };
     }
 
-    $t->stop();
-    return $this->summarize($result, $t->elapsedTime());
+    $timer->stop();
+    return $this->summarize($result, $timer->elapsedTime());
   }
 }
