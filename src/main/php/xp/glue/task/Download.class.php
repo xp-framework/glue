@@ -68,7 +68,7 @@ class Download extends Task {
         $chunk= $this->stream->read();
         $done+= strlen($chunk);
         $out->write($chunk);
-        $progress($done / $this->size);
+        $progress($done / $this->size * 100);
       }
     
       $this->stream->close();

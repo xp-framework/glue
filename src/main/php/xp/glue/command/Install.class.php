@@ -7,6 +7,7 @@ use util\Properties;
 use webservices\json\JsonFactory;
 use lang\reflect\Package;
 use xp\glue\input\GlueFile;
+use xp\glue\Progress;
 use util\profiling\Timer;
 
 /**
@@ -55,26 +56,20 @@ class Install extends Command {
             str_repeat("\x08", strlen($line) + strlen($name) + 1 + strlen($remote['project']->version())+ 2)
           );
 
-          $step= self::PW / sizeof($remote['tasks']);
-          $progress= function($percent, $full) {
-            static $current= 0.0;
-            $done= ceil($percent * $full);
-            if ($done != $current) {
-              Console::write(str_repeat('#', $done - $current));
-              $current= $done;
-            }
-          };
-
           // Perform tasks
+          $progress= new Progress(self::PW, '#');
+          $steps= sizeof($remote['tasks']);
           $vendor= new Folder($libs, $dependency->vendor());
           foreach ($remote['tasks'] as $i => $task) {
             $paths[]= $task->perform(
               $dependency,
               $vendor,
-              function($percent) use($progress, $i, $step) { $progress($percent, $i * $step); }
+              function($percent) use($progress, $i, $steps) {
+                $progress->update($percent / $steps * ($i + 1));
+              }
             );
           }
-          $progress(1.0, self::PW);
+          $progress->update(100);
           Console::writeLine();
 
           // Register dependencies
