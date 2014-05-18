@@ -10,14 +10,40 @@ class GlueFile extends \lang\Object {
   protected $json;
 
   /**
-   * Constructor.
+   * Constructor
    */
   public function __construct() {
     $this->json= JsonFactory::create();
   }
 
   /**
+   * Verifies the configuraton
+   *
+   * @param  [:var] $config
+   * @return [:var] Verified configuration
+   * @throws lang.FormatException
+   */
+  protected function verify($config) {
+    $missing= function($config, $element) {
+      throw new \lang\FormatException('Configuration missing '.$element.': '.\xp::stringOf($config));
+    };
+
+    // Required
+    if (!isset($config['name'])) $missing('name');
+    if (!isset($config['version'])) $missing('version');
+
+    // Optional
+    if (!isset($config['require'])) $config['require']= [];
+
+    return $config;
+  }
+
+  /**
    * Parse a glue.json
+   *
+   * @param  io.streams.InputStream $in
+   * @param  string $source
+   * @return xp.glue.Project
    */
   public function parse(InputStream $in, $source= 'glue.json') {
     try {
@@ -25,6 +51,8 @@ class GlueFile extends \lang\Object {
     } catch (JsonException $e) {
       throw new \lang\FormatException('Cannot parse '.$source, $e);
     }
+
+    $config= $this->verify($config);
 
     $dependencies= [];
     foreach ($config['require'] as $module => $required) {
