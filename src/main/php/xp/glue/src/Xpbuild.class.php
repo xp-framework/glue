@@ -7,6 +7,7 @@ use peer\URL;
 use xp\glue\task\Download;
 use xp\glue\Project;
 use xp\glue\Dependency;
+use xp\glue\Requirement;
 
 /**
  * XP Build System source
@@ -51,7 +52,7 @@ class Xpbuild extends Source {
     if (200 !== $res->status()) return null;
 
     $module= $res->data();
-    if (!($release= $this->select($module['releases'], $dependency->required()))) {
+    if (!($release= $this->select($module['releases'], $dependency->required()->spec()))) {
 
       // Has the module, but not the correct version
       return null;

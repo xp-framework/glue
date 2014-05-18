@@ -7,12 +7,13 @@ use xml\Tree;
 use io\streams\InputStream;
 use xp\glue\Project;
 use xp\glue\Dependency;
+use xp\glue\Requirement;
 
 class MavenPOM extends \lang\Object {
   protected $parser;
 
   /**
-   * Constructor.
+   * Constructor
    */
   public function __construct() {
     $this->parser= new XMLParser();
@@ -20,6 +21,10 @@ class MavenPOM extends \lang\Object {
 
   /**
    * Parse a pom.xml file
+   *
+   * @param  io.streams.InputStream $in
+   * @param  string $source
+   * @return xp.glue.Project
    */
   public function parse(InputStream $in, $source= 'pom.xml') {
     $tree= new Tree();
@@ -35,7 +40,7 @@ class MavenPOM extends \lang\Object {
       $dependencies[]= new Dependency(
         $textOf($dep, 'pom:groupId'),
         $textOf($dep, 'pom:artifactId').($classifier ? '-'.$classifier : ''),
-        $textOf($dep, 'pom:version')
+        new Requirement($textOf($dep, 'pom:version'))
       );
     }
 

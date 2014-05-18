@@ -43,7 +43,7 @@ class Install extends Command {
 
     // Don't use foreach() here as that doesn't allow modification during iteration
     while (list($module, $dependency)= each($dependencies)) {
-      $line= '[>>> '.str_repeat('.', self::PW).'] '.$module.' @ '.$dependency->required();
+      $line= '[>>> '.str_repeat('.', self::PW).'] '.$module.' @ '.$dependency->required()->spec();
       Console::write($line);
 
       foreach ($this->sources as $name => $source) {

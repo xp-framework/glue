@@ -12,9 +12,9 @@ class Dependency extends \lang\Object {
    *
    * @param  string $vendor
    * @param  string $name
-   * @param  string $required Version requirement
+   * @param  xp.glue.Requirement $required Version requirement
    */
-  public function __construct($vendor, $name, $required) {
+  public function __construct($vendor, $name, Requirement $required) {
     $this->vendor= $vendor;
     $this->name= $name;
     $this->required= $required;
@@ -30,7 +30,7 @@ class Dependency extends \lang\Object {
     return $this->name;
   }
 
-  /** @return string */
+  /** @return xp.glue.Requirement */
   public function required() {
     return $this->required;
   }
@@ -41,6 +41,6 @@ class Dependency extends \lang\Object {
    * @return string
    */
   public function toString() {
-    return $this->getClassName().'<'.$this->vendor.'/'.$this->name.'@'.$this->required.'>';
+    return $this->getClassName().'<'.$this->vendor.'/'.$this->name.'@'.$this->required->spec().'>';
   }
 }

@@ -5,6 +5,7 @@ use webservices\json\JsonFactory;
 use webservices\json\JsonException;
 use xp\glue\Project;
 use xp\glue\Dependency;
+use xp\glue\Requirement;
 
 class GlueFile extends \lang\Object {
   protected $json;
@@ -57,7 +58,7 @@ class GlueFile extends \lang\Object {
     $dependencies= [];
     foreach ($config['require'] as $module => $required) {
       sscanf($module, "%[^/]/%[^\r]", $vendor, $name);
-      $dependencies[]= new Dependency($vendor, $name, $required);
+      $dependencies[]= new Dependency($vendor, $name, new Requirement($required));
     }
 
     sscanf($config['name'], "%[^/]/%[^\r]", $vendor, $name);
