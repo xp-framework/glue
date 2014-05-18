@@ -7,8 +7,8 @@ This tool glues together XP Framework projects. It depends on a `glue.json` file
   "name"    : "thekid/dialog",
   "version" : "4.0.0",
   "require" : {
-    "xp-forge/mustache" : "1.2+",
-    "xp-framework/core" : "5.9~"
+    "xp-forge/mustache" : ">=1.2",
+    "xp-framework/core" : "~5.9"
   }
 }
 ```
@@ -17,8 +17,12 @@ To fetch the dependencies, simply run Glue's *install* command:
 
 ```sh
 $ glue install
-[200 ##########] xp-forge/mustache @ 1.2+: xpbuild@public 1.2.0
-[200 ##########] xp-framework/core @ 5.9~: checkout@local 5.9.11
+[200 ##########] xp-forge/mustache @ >=1.2: xpbuild@public 1.2.0
+[200 ##########] xp-framework/core @ ~5.9: checkout@local 5.9.11
+
+OK, 2 dependencies processed, 5 paths registered
+Memory used: 3367.71 kB (3625.53 kB peak)
+Time taken: 1.206 seconds
 ```
 
 This will fetch the libraries according to the dependency information, place them inside the current directory and adjust the class path accordingly.

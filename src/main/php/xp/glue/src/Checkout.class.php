@@ -33,6 +33,11 @@ class Checkout extends Source {
     $glue= new File($target, 'glue.json');
     if (!$target->exists()) return null;
 
+    $project= (new GlueFile())->parse($glue->getInputStream());
+    if (!$dependency->required()->matches($project->version())) {
+      return null;
+    }
+
     $tasks= [];
     foreach (['main', 'test'] as $f) {
       $f= new Folder($target, 'src', $f);
@@ -43,7 +48,7 @@ class Checkout extends Source {
     }
 
     return [
-      'project' => (new GlueFile())->parse($glue->getInputStream()),
+      'project' => $project,
       'tasks'   => $tasks
     ];
   }
