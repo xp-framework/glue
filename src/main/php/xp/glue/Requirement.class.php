@@ -13,9 +13,16 @@ class Requirement extends \lang\Object {
   protected $compare;
 
   protected function normalize($spec, $offset= 0) {
-    $minor= $patch= 0;
-    sscanf(substr($spec, $offset), '%d.%d.%d', $major, $minor, $patch);
-    return sprintf('%d.%d.%d', $major, $minor, $patch);
+    $scan= substr($spec, $offset);
+    if (!preg_match('/^([0-9]+)(\.([0-9]+))?(\.([0-9]+))?$/', $scan, $matches)) {
+      throw new \lang\FormatException('Invalid specifier "'.$scan.'"');
+    }
+    return sprintf(
+      '%d.%d.%d',
+      $matches[1],
+      isset($matches[3]) ? $matches[3] : 0,
+      isset($matches[5]) ? $matches[5] : 0
+    );
   }
 
   /**
@@ -27,7 +34,10 @@ class Requirement extends \lang\Object {
     $this->spec= $spec;
 
     foreach (explode(',', $spec) as $specifier) {
-      if (strstr($specifier, '*')) {
+      $specifier= trim($specifier);
+      if ('' === $specifier) {
+        throw new \lang\FormatException('Invalid specifier: <empty>');
+      } else if (strstr($specifier, '*')) {
         if (sscanf($specifier, '%d.%[0-9*.]', $major, $wildcard) < 2) {
           throw new \lang\FormatException('Invalid wildcard specifier "'.$spec.'"');
         }

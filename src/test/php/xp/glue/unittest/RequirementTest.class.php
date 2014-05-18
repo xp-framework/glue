@@ -6,11 +6,18 @@ class RequirementTest extends \unittest\TestCase {
 
   /** @return string[] */
   protected function validSpecs() {
-    return ['1.0.2', '1.0.*'];
+    return ['1.0.0', '1.0', '1.0.*', '!=1.0.0', '~1.0.0', '>=1.0.0', '<=1.0.0', '>1.0', '<1.0'];
   }
 
   #[@test, @values('validSpecs')]
   public function can_create($spec) {
+    new Requirement($spec);
+  }
+
+  #[@test, @expect(class= 'lang.FormatException', withMessage= '/Invalid specifier/'), @values(
+  #  ['a.b.c', '', '-1', '1.a.b', '...']
+  #)]
+  public function invalid_specifier($spec) {
     new Requirement($spec);
   }
 
