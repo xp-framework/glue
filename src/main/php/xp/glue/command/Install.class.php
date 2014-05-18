@@ -155,11 +155,12 @@ class Install extends Command {
    * @param  string[] $args
    */
   public function execute(array $args) {
+    $t= new Timer();
+    $t->start();
+
     $cwd= new Folder('.');
     $project= (new GlueFile())->parse((new File($cwd, 'glue.json'))->getInputStream());
 
-    $t= new Timer();
-    $t->start();
     try {
       $count= $this->createPathFile(
         new File($cwd, 'glue.pth'),
