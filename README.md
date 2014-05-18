@@ -29,9 +29,17 @@ This will fetch the libraries according to the dependency information, place the
 
 ***After this step, you're ready to run the checked out software.***
 
-Setup
------
-To set up glue, symlink the `glue` script into a directory in your PATH and place a `glue.ini` file next to it. Open the configuration file and add something along the lines of the following:
+Initial setup
+-------------
+To set up glue, symlink the `glue` script into a directory in your PATH and place a `glue.ini` file next to it. 
+
+```sh
+$ cd ~/bin
+$ ln -s /path/to/glue/glue
+$ cp /path/to/glue/glue.ini .
+```
+
+Open the configuration file and add something along the lines of the following:
 
 ```ini
 [sources]
