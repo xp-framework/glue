@@ -25,7 +25,7 @@ class Install extends Command {
   public function configure(Properties $conf) {
     parent::configure($conf);
     $this->sources= [];
-    foreach ($this->conf->readSection('sources')['source'] as $name => $url) {
+    foreach ($this->conf->readSection('sources') as $name => $url) {
       sscanf($name, '%[^@]@%s', $impl, $spec);
       $this->sources[$name]= Package::forName('xp.glue.src')->loadClass(ucfirst($impl))->newInstance($url);
     }

@@ -35,7 +35,7 @@ To set up glue, symlink the `glue` script into a directory in your PATH and plac
 
 ```ini
 [sources]
-source[checkout@local]="xp-framework@/path/to/devel/xp|xp-forge@/path/to/devel/xp"
-source[xpbuild@public]="http://builds.planet-xp.net/"
-source[artifactory@idev]="https://friebe:******@artifactory.example.com/artifactory/"
+checkout@local="xp-framework@/path/to/devel/xp|xp-forge@/path/to/devel/xp"
+xpbuild@public="http://builds.planet-xp.net/"
+artifactory@idev="https://friebe:******@artifactory.example.com/artifactory/"
 ```
