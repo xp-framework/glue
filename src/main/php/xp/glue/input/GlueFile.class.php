@@ -7,6 +7,21 @@ use xp\glue\Project;
 use xp\glue\Dependency;
 use xp\glue\Requirement;
 
+/**
+ * A gluefile contains project and version information as well as requirements.
+ * The names are written in the `vendor/module` convention.
+ *
+ * ```json
+ * {
+ *   "name"    : "thekid/dialog",
+ *   "version" : "4.0.0",
+ *   "require" : {
+ *     "xp-forge/mustache" : ">=1.2",
+ *     "xp-framework/core" : "~5.9"
+ *   }
+ * }
+ * ```
+ */
 class GlueFile extends \lang\Object {
   protected $json;
 
