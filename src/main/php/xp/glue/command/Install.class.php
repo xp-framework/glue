@@ -7,6 +7,7 @@ use util\Properties;
 use webservices\json\JsonFactory;
 use lang\reflect\Package;
 use xp\glue\input\GlueFile;
+use util\profiling\Timer;
 
 /**
  * Install: Downloads dependencies
@@ -107,9 +108,10 @@ class Install extends Command {
    * @param  io.File $file
    * @param  io.Folder $cwd
    * @param  string[] $paths
-   * @return void
+   * @return int
    */
   protected function createPathFile($file, $cwd, array $paths) {
+    $count= 0;
     $pth= $file->getOutputStream();
     $base= $cwd->getURI();
     foreach ($paths as $path) {
@@ -119,8 +121,32 @@ class Install extends Command {
         $entry= $path;
       }
       $pth->write($entry."\n");
+      $count++;
     }
     $pth->close();
+    return $count;
+  }
+
+  /**
+   * Summarize results
+   *
+   * @param  var $result
+   * @param  double $elapsed
+   * @return int exit code
+   */
+  protected function summarize($result, $elapsed) {
+    $rt= \lang\Runtime::getInstance();
+
+    Console::writeLine();
+    $exit= $result();
+    Console::writeLinef(
+      "Memory used: %.2f kB (%.2f kB peak)\nTime taken: %.3f seconds",
+      $rt->memoryUsage() / 1024,
+      $rt->peakMemoryUsage() / 1024,
+      $elapsed
+    );
+
+    return $exit;
   }
 
   /**
@@ -131,10 +157,32 @@ class Install extends Command {
   public function execute(array $args) {
     $cwd= new Folder('.');
     $project= (new GlueFile())->parse((new File($cwd, 'glue.json'))->getInputStream());
-    $this->createPathFile(
-      new File($cwd, 'glue.pth'),
-      $cwd,
-      $this->fetch(new Folder($cwd, 'vendor'), $this->dependencyLookupOf($project->dependencies()))
-    );
+
+    $t= new Timer();
+    $t->start();
+    try {
+      $count= $this->createPathFile(
+        new File($cwd, 'glue.pth'),
+        $cwd,
+        $this->fetch(new Folder($cwd, 'vendor'), $this->dependencyLookupOf($project->dependencies()))
+      );
+      $result= function() use($project, $count) {
+        Console::writeLinef(
+          "\033[42;1;37mOK, %d dependencies processed, %d paths registered\033[0m",
+          sizeof($project->dependencies()),
+          $count
+        );
+      };
+    } catch (\lang\Throwable $t) {
+      $result= function() use($t) {
+        $error= explode("\n", $t->toString(), 2);
+        Console::writeLinef("\n\033[41;1;37mFAIL: %s\033[0m", $error[0]);
+        Console::writeLine($error[1]);
+        return 1;
+      };
+    }
+
+    $t->stop();
+    return $this->summarize($result, $t->elapsedTime());
   }
 }
