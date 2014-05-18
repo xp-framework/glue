@@ -47,3 +47,18 @@ checkout@local="xp-framework@/path/to/devel/xp|xp-forge@/path/to/devel/xp"
 xpbuild@public="http://builds.planet-xp.net/"
 artifactory@idev="https://friebe:******@artifactory.example.com/artifactory/"
 ```
+
+Version specifiers
+------------------
+You can use the following to select the version you'd like to have installed:
+
+| Specifier         | Meaning |
+| ----------------- | --------|
+| `1.0.0`, `1.0`    | Exact version match required. |
+| `>1.2`, `>=1.2.3` | A greater than / great than or equal to constraint. |
+| `<1.2`, `<=1.2.3` | A less than / less than or equal to constraint. |
+| `>=1.2,<1.3`      | Use commas to separate multiple conditions applied with a logical **and**. |
+| `~1.2`            | The next significant release, meaning `>=1.2,<2.0`, so any 1.x version is OK. |
+| `1.2.*`           | Any version starting with `1.2` matches this wildcard. |
+
+Comparisons are performed accordint to [semantic versioning](http://semver.org/).
