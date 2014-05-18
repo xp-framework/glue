@@ -4,6 +4,7 @@ use webservices\rest\RestClient;
 use webservices\rest\RestRequest;
 use peer\http\HttpConnection;
 use peer\URL;
+use xp\glue\Dependency;
 use xp\glue\task\Download;
 use xp\glue\input\MavenPOM;
 
@@ -34,11 +35,17 @@ class Artifactory extends Source {
     return substr((new URL($uri))->getPath(), strlen($base->getPath()));
   }
 
-  public function fetch($vendor, $name, $version) {
+  /**
+   * Fetches the given dependency. Returns NULL if the dependency cannot be found.
+   *
+   * @param  xp.glue.Dependency $dependency
+   * @param  [:var] $result
+   */
+  public function fetch(Dependency $dependency) {
     $res= $this->rest->execute((new RestRequest('/api/search/gavc'))
-      ->withParameter('g', $vendor)
-      ->withParameter('a', $name)
-      ->withParameter('v', $version)
+      ->withParameter('g', $dependency->vendor())
+      ->withParameter('a', $dependency->name())
+      ->withParameter('v', $dependency->required())
       ->withAccept('application/vnd.org.jfrog.artifactory.search.GavcSearchResult+json')
     );
 

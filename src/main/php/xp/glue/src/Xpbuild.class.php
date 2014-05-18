@@ -6,6 +6,7 @@ use peer\http\HttpConnection;
 use peer\URL;
 use xp\glue\task\Download;
 use xp\glue\Project;
+use xp\glue\Dependency;
 
 /**
  * XP Build System source
@@ -35,16 +36,22 @@ class Xpbuild extends Source {
     return null;
   }
 
-  public function fetch($vendor, $name, $spec) {
+  /**
+   * Fetches the given dependency. Returns NULL if the dependency cannot be found.
+   *
+   * @param  xp.glue.Dependency $dependency
+   * @param  [:var] $result
+   */
+  public function fetch(Dependency $dependency) {
     $res= $this->rest->execute((new RestRequest('/vendors/{vendor}/modules/{module}'))
-      ->withSegment('vendor', $vendor)
-      ->withSegment('module', $name)
+      ->withSegment('vendor', $dependency->vendor())
+      ->withSegment('module', $dependency->name())
     );
 
     if (200 !== $res->status()) return null;
 
     $module= $res->data();
-    if (!($release= $this->select($module['releases'], $spec))) {
+    if (!($release= $this->select($module['releases'], $dependency->required()))) {
 
       // Has the module, but not the correct version
       return null;
@@ -52,8 +59,8 @@ class Xpbuild extends Source {
 
     $tasks= [];
     $res= $this->rest->execute((new RestRequest('/vendors/{vendor}/modules/{module}/releases/{release}'))
-      ->withSegment('vendor', $vendor)
-      ->withSegment('module', $name)
+      ->withSegment('vendor', $module['vendor'])
+      ->withSegment('module', $module['module'])
       ->withSegment('release', $release)
     );
     $base= $this->rest->getBase();

@@ -47,7 +47,7 @@ class Install extends Command {
       Console::write($line);
 
       foreach ($this->sources as $name => $source) {
-        if (null !== ($remote= $source->fetch($dependency->vendor(), $dependency->name(), $dependency->required()))) {
+        if (null !== ($remote= $source->fetch($dependency))) {
           Console::writef(
             ": %s %s%s[\033[44;1;37m200\033[0m ",
             $name,

@@ -4,6 +4,7 @@ use io\Folder;
 use io\File;
 use xp\glue\input\GlueFile;
 use xp\glue\task\LinkTo;
+use xp\glue\Dependency;
 
 /**
  * GIT checkout in the local file system
@@ -19,10 +20,16 @@ class Checkout extends Source {
     }
   }
 
-  public function fetch($vendor, $name, $spec) {
-    if (!isset($this->bases[$vendor])) return null;
+  /**
+   * Fetches the given dependency. Returns NULL if the dependency cannot be found.
+   *
+   * @param  xp.glue.Dependency $dependency
+   * @param  [:var] $result
+   */
+  public function fetch(Dependency $dependency) {
+    if (!isset($this->bases[$dependency->vendor()])) return null;
 
-    $target= new Folder($this->bases[$vendor], $name);
+    $target= new Folder($this->bases[$dependency->vendor()], $dependency->name());
     $glue= new File($target, 'glue.json');
     if (!$target->exists()) return null;
 
