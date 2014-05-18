@@ -55,6 +55,7 @@ You can use the following to select the version you'd like to have installed:
 | Specifier         | Meaning |
 | ----------------- | --------|
 | `1.0.0`, `1.0`    | Exact version match required. |
+| `!=1.0.0`         | Any version not equal to `1.0.0` will match this. |
 | `>1.2`, `>=1.2.3` | A greater than / great than or equal to constraint. |
 | `<1.2`, `<=1.2.3` | A less than / less than or equal to constraint. |
 | `>=1.2,<1.3`      | Use commas to separate multiple conditions applied with a logical **and**. |
