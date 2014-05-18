@@ -12,19 +12,6 @@ class Requirement extends \lang\Object {
   protected $spec;
   protected $compare;
 
-  protected function normalize($spec, $offset= 0) {
-    $scan= substr($spec, $offset);
-    if (!preg_match('/^([0-9]+)(\.([0-9]+))?(\.([0-9]+))?$/', $scan, $matches)) {
-      throw new \lang\FormatException('Invalid specifier "'.$scan.'"');
-    }
-    return sprintf(
-      '%d.%d.%d',
-      $matches[1],
-      isset($matches[3]) ? $matches[3] : 0,
-      isset($matches[5]) ? $matches[5] : 0
-    );
-  }
-
   /**
    * Creates a new project instance
    *
@@ -78,6 +65,27 @@ class Requirement extends \lang\Object {
         };
       }
     }
+  }
+
+  /**
+   * Normalize a specifier to three-digit notation
+   *
+   * @param  string $spec
+   * @param  int $offset
+   * @return string
+   * @throws lang.FormatException
+   */
+  protected function normalize($spec, $offset= 0) {
+    $scan= substr($spec, $offset);
+    if (!preg_match('/^([0-9]+)(\.([0-9]+))?(\.([0-9]+))?$/', $scan, $matches)) {
+      throw new \lang\FormatException('Invalid specifier "'.$scan.'"');
+    }
+    return sprintf(
+      '%d.%d.%d',
+      $matches[1],
+      isset($matches[3]) ? $matches[3] : 0,
+      isset($matches[5]) ? $matches[5] : 0
+    );
   }
 
   /** @return string */
