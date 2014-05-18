@@ -6,7 +6,8 @@ use io\File;
 use xp\glue\Dependency;
 
 /**
- * Download a file
+ * The "Download" task fetches a file from a given stream and stores
+ * it locally.
  */
 class Download extends Task {
   protected $stream;
@@ -60,21 +61,28 @@ class Download extends Task {
   public function perform(Dependency $dependency, Folder $folder, callable $progress) {
     $folder->exists() || $folder->create(0755);
 
-    $target= new File($folder, $this->file());
-    $bytes= $this->size();
-    
-    with ($in= $this->stream(), $out= $target->getOutputStream()); {
-      $c= 0; $read= 0;
-      while ($in->available()) {
-        $chunk= $in->read();
-        $read+= strlen($chunk);
+    $target= new File($folder, $this->file);
+    with ($out= $target->getOutputStream()); {
+      $done= 0;
+      while ($this->stream->available()) {
+        $chunk= $this->stream->read();
+        $done+= strlen($chunk);
         $out->write($chunk);
-        $progress($read / $bytes);
+        $progress($done / $this->size);
       }
     
-      $in->close();
+      $this->stream->close();
       $out->close();
     }
     return $target->getURI();
+  }
+
+  /**
+   * Creates a string representation
+   *
+   * @return string
+   */
+  public function toString() {
+    return $this->getClassName().'<'.$this->file.' ('.$this->sha1.')>';
   }
 }

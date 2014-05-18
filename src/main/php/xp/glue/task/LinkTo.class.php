@@ -4,7 +4,8 @@ use io\Folder;
 use xp\glue\Dependency;
 
 /**
- * Download a file
+ * The "LinkTo" task creates a classpath entry pointing to an existing
+ * folder on the local hard drive.
  */
 class LinkTo extends Task {
   protected $folder;
@@ -33,5 +34,14 @@ class LinkTo extends Task {
    */
   public function perform(Dependency $dependency, Folder $folder, callable $progress) {
     return $this->folder()->getURI();
+  }
+
+  /**
+   * Creates a string representation
+   *
+   * @return string
+   */
+  public function toString() {
+    return $this->getClassName().'<'.$this->folder->toString().'>';
   }
 }
