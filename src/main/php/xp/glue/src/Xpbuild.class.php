@@ -22,17 +22,20 @@ class Xpbuild extends Source {
     // $this->rest->setTrace((new \util\log\LogCategory(''))->withAppender(new \util\log\ConsoleAppender()));
   }
 
-  protected function select($releases, $spec) {
+  /**
+   * Select the newest release that matches the given requirement
+   *
+   * @param  [:var] $releases A map version => info
+   * @param  xp.glue.Requirement $requirement
+   * @param  string The selected version, or NULL
+   */
+  protected function select($releases, Requirement $requirement) {
     uksort($releases, function($a, $b) {
       return version_compare($a, $b, '<');
     });
 
-    if ('*' === $spec) {
-      return key($releases);
-    } else {
-      foreach ($releases as $release => $info) {
-        if (version_compare($spec, $release, 'eq')) return $release;
-      }
+    foreach ($releases as $version => $info) {
+      if ($requirement->matches($version)) return $version;
     }
     return null;
   }
@@ -52,7 +55,7 @@ class Xpbuild extends Source {
     if (200 !== $res->status()) return null;
 
     $module= $res->data();
-    if (!($release= $this->select($module['releases'], $dependency->required()->spec()))) {
+    if (!($release= $this->select($module['releases'], $dependency->required()))) {
 
       // Has the module, but not the correct version
       return null;

@@ -45,7 +45,7 @@ class Artifactory extends Source {
     $res= $this->rest->execute((new RestRequest('/api/search/gavc'))
       ->withParameter('g', $dependency->vendor())
       ->withParameter('a', $dependency->name())
-      ->withParameter('v', $dependency->required())
+      ->withParameter('v', $dependency->required()->spec())  // TODO: Convert syntax
       ->withAccept('application/vnd.org.jfrog.artifactory.search.GavcSearchResult+json')
     );
 
