@@ -13,9 +13,15 @@ use util\profiling\Timer;
  * Install: Downloads dependencies
  */
 class Install extends Command {
-  const PW = 10;
+  const PW = 16;
   protected $sources= [];
 
+  /**
+   * Configure this command
+   *
+   * @param  util.Properties $conf
+   * @return void
+   */
   public function configure(Properties $conf) {
     parent::configure($conf);
     $this->sources= [];
@@ -25,6 +31,13 @@ class Install extends Command {
     }
   }
 
+  /**
+   * Fetch dependencies and returns URIs ready for adding to class path.
+   *
+   * @param  io.Folder $libs target folder
+   * @param  [:xp.glue.Dependency] $dependencies
+   * @return string[]
+   */
   protected function fetch(Folder $libs, $dependencies) {
     $paths= [];
 
