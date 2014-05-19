@@ -11,6 +11,7 @@
 class Requirement extends \lang\Object {
   protected $spec;
   protected $compare;
+  protected $fixed;
 
   /**
    * Creates a new project instance
@@ -19,7 +20,7 @@ class Requirement extends \lang\Object {
    */
   public function __construct($spec) {
     $this->spec= $spec;
-
+    $this->fixed= false;
     foreach (explode(',', $spec) as $specifier) {
       $specifier= trim($specifier);
       if ('' === $specifier) {
@@ -60,6 +61,7 @@ class Requirement extends \lang\Object {
         };
       } else {
         $exact= $this->normalize($specifier);
+        $this->fixed= true;
         $this->compare[]= function($compare) use($exact) {
           return $compare === $exact;
         };
@@ -90,6 +92,9 @@ class Requirement extends \lang\Object {
 
   /** @return string */
   public function spec() { return $this->spec; }
+
+  /** @return bool */
+  public function fixed() { return $this->fixed; }
 
   /**
    * Compares this requirement against a given version
