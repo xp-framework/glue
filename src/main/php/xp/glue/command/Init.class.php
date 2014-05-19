@@ -1,9 +1,11 @@
 <?php namespace xp\glue\command;
 
 use xp\glue\input\MavenPOM;
+use xp\glue\Project;
 use io\File;
 use io\Folder;
 use util\cmd\Console;
+use lang\System;
 
 /**
  * Init: Transforms existing projects to glue
@@ -15,11 +17,12 @@ class Init extends Command {
       $project= (new MavenPOM())->parse((new File('pom.xml'))->getInputStream());
       Console::writeLine('Importing Maven POM ', $project);
     } else {
-      $project= [
-        'vendor'  => \lang\System::getProperty('user.name'),
-        'name'    => (new Folder('.'))->dirname,
-        'version' => '0.0.1'
-      ];
+      $project= new Project(
+        System::getProperty('user.name'),
+        (new Folder('.'))->dirname,
+        '0.0.1',
+        []
+      );
       Console::writeLine('Creating empty project ', $project);
     }
 
