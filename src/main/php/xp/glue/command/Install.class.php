@@ -48,19 +48,19 @@ class Install extends Command {
       Console::write($line);
 
       foreach ($this->sources as $name => $source) {
-        if (null !== ($remote= $source->fetch($dependency))) {
+        if (null !== ($resolved= $source->fetch($dependency))) {
           Console::writef(
             ": %s %s%s[\033[44;1;37m200\033[0m ",
             $name,
-            $remote['project']->version(),
-            str_repeat("\x08", strlen($line) + strlen($name) + 1 + strlen($remote['project']->version())+ 2)
+            $resolved['project']->version(),
+            str_repeat("\x08", strlen($line) + strlen($name) + 1 + strlen($resolved['project']->version())+ 2)
           );
 
           // Perform tasks
           $progress= new Progress(self::PW, '#');
-          $steps= sizeof($remote['tasks']);
+          $steps= sizeof($resolved['tasks']);
           $vendor= new Folder($libs, $dependency->vendor());
-          foreach ($remote['tasks'] as $i => $task) {
+          foreach ($resolved['tasks'] as $i => $task) {
             $paths[]= $task->perform(
               $dependency,
               $vendor,
@@ -73,7 +73,7 @@ class Install extends Command {
           Console::writeLine();
 
           // Register dependencies
-          foreach ($remote['project']->dependencies() as $dependency) {
+          foreach ($resolved['project']->dependencies() as $dependency) {
             $key= $dependency->vendor().'/'.$dependency->name();
             if (isset($dependencies[$key])) {
 
