@@ -47,7 +47,7 @@ class MavenPOM extends \lang\Object {
         $classifier= $textOf($dep, 'pom:classifier');
         $dependencies[]= new Dependency(
           $textOf($dep, 'pom:groupId'),
-          $textOf($dep, 'pom:artifactId').($classifier ? '-'.$classifier : ''),
+          $textOf($dep, 'pom:artifactId').($classifier ? '~'.$classifier : ''),
           new Requirement($textOf($dep, 'pom:version'))
         );
       }

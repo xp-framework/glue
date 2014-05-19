@@ -42,19 +42,27 @@ class Artifactory extends Source {
    * Select matching results
    *
    * @param  var[] $results
-   * @param  string $name
+   * @param  string[] $names
    * @param  xp.glue.Requirement $required
    * @return var Newest result matching
    */
-  protected function select($results, $name, $required) {
-    $pattern= Pattern::compile('('.$name.')/([0-9\.]+)(-SNAPSHOT)?/');
+  protected function select($results, $names, $required) {
+    $base= '('.preg_quote($names[0], '/').')-([0-9\.]+)(-SNAPSHOT)?';
+    if (isset($names[1])) {
+      $pattern= Pattern::compile($base.'(-'.preg_quote($names[1], '/').'\.xar|\.pom)$');
+    } else {
+      $pattern= Pattern::compile($base.'\.(xar|pom)$');
+    }
 
     $selected= [];
     foreach ($results as $result) {
-      $version= $pattern->match($result['path'])->group(0)[2];
-      if (!$required->matches($version)) {
-        continue;
-      } else if (isset($selected[$version])) {
+      $match= $pattern->match($result['path']);
+      if ($match->length() < 1) continue;
+
+      $version= $match->group(0)[2];
+      if (!$required->matches($version)) continue;
+
+      if (isset($selected[$version])) {
         $selected[$version][]= $result;
       } else {
         $selected[$version]= [$result];
@@ -72,9 +80,10 @@ class Artifactory extends Source {
    * @param  [:var] $result
    */
   public function fetch(Dependency $dependency) {
+    $names= explode('~', $dependency->name());
     $search= (new RestRequest('/api/search/gavc'))
       ->withParameter('g', $dependency->vendor())
-      ->withParameter('a', $dependency->name())
+      ->withParameter('a', $names[0])
       ->withHeader('X-Result-Detail', 'info')
       ->withAccept('application/vnd.org.jfrog.artifactory.search.GavcSearchResult+json')
     ;
@@ -91,7 +100,7 @@ class Artifactory extends Source {
     }
 
     $response= $res->data();
-    if (!($results= $this->select($response['results'], $dependency->name(), $required))) {
+    if (!($results= $this->select($response['results'], $names, $required))) {
 
       // No applicable version found
       return null;
