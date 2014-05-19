@@ -41,6 +41,7 @@ class Checkout extends Source {
     $tasks= [];
     foreach (['main', 'test'] as $f) {
       $f= new Folder($target, 'src', $f);
+      if (!$f->exists()) continue;
       while ($entry= $f->getEntry()) {
         $tasks[]= new LinkTo(new Folder($f, $entry));
       }
