@@ -21,24 +21,16 @@ class Project extends \lang\Object {
   }
 
   /** @return string */
-  public function vendor() {
-    return $this->vendor;
-  }
+  public function vendor() { return $this->vendor; }
 
   /** @return string */
-  public function name() {
-    return $this->name;
-  }
+  public function name() { return $this->name; }
 
   /** @return string */
-  public function version() {
-    return $this->version;
-  }
+  public function version() { return $this->version; }
 
   /** @return xp.glue.Dependency[] */
-  public function dependencies() {
-    return $this->dependencies;
-  }
+  public function dependencies() { return $this->dependencies; }
 
   /**
    * Creates a string representation

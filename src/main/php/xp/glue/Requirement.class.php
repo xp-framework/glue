@@ -89,9 +89,7 @@ class Requirement extends \lang\Object {
   }
 
   /** @return string */
-  public function spec() {
-    return $this->spec;
-  }
+  public function spec() { return $this->spec; }
 
   /**
    * Compares this requirement against a given version

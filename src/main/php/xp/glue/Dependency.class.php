@@ -21,19 +21,13 @@ class Dependency extends \lang\Object {
   }
 
   /** @return string */
-  public function vendor() {
-    return $this->vendor;
-  }
+  public function vendor() { return $this->vendor; }
 
   /** @return string */
-  public function name() {
-    return $this->name;
-  }
+  public function name() { return $this->name; }
 
   /** @return xp.glue.Requirement */
-  public function required() {
-    return $this->required;
-  }
+  public function required() { return $this->required; }
 
   /**
    * Creates a string representation

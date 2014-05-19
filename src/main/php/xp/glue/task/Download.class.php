@@ -31,24 +31,16 @@ class Download extends Task {
   }
 
   /** @return io.streams.InputStream */
-  public function stream() {
-    return $this->stream;
-  }
+  public function stream() { return $this->stream; }
 
   /** @return string */
-  public function file() {
-    return $this->file;
-  }
+  public function file() { return $this->file; }
 
   /** @return int */
-  public function size() {
-    return $this->size;
-  }
+  public function size() { return $this->size; }
 
   /** @return string */
-  public function sha1() {
-    return $this->sha1;
-  }
+  public function sha1() { return $this->sha1; }
 
   /**
    * Perform this task and return a URI useable for the class path

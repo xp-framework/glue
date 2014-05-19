@@ -20,9 +20,7 @@ class LinkTo extends Task {
   }
 
   /** @return io.Folder */
-  public function folder() {
-    return $this->folder;
-  }
+  public function folder() { return $this->folder; }
 
   /**
    * Perform this task and return a URI useable for the class path
