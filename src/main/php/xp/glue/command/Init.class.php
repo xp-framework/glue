@@ -30,14 +30,19 @@ class Init extends Command {
     $target= new File('glue.json');
     with ($out= $target->getOutputStream()); {
       $out->write("{\n");
-      $out->write('  "name"    : '.self::$json->encode($project->vendor().'/'.$project->name()).",\n");
-      $out->write('  "version" : '.self::$json->encode($project->version()).",\n");
+      $out->write('  "name"    : "'.$project->vendor().'/'.$project->name()."\",\n");
+      $out->write('  "version" : "'.$project->version()."\",\n");
       $out->write('  "require" : {'."\n");
 
       $dependencies= $project->dependencies();
       $s= sizeof($dependencies) - 1;
       foreach ($dependencies as $i => $dep) {
-        $out->write('    '.self::$json->encode($dep->vendor().'/'.$dep->name()).' : '.self::$json->encode($dep->required()));
+        $out->write(sprintf(
+          '    "%s/%s" : "%s"',
+          $dep->vendor(),
+          $dep->name(),
+          $dep->required()->spec()
+        ));
         $out->write($i < $s ? ",\n" : "\n");
       }
       $out->write("  }\n");
