@@ -30,6 +30,16 @@ class Dependency extends \lang\Object {
   public function required() { return $this->required; }
 
   /**
+   * Returns this dependency's vendor and name concatenated together with
+   * a forward slash, e.g. `xp-framework/core` or `thekid/dialog`.
+   *
+   * @return  string
+   */
+  public function compoundName() {
+    return $this->vendor.'/'.$this->name;
+  }
+
+  /**
    * Creates a string representation
    *
    * @return string

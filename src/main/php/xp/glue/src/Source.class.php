@@ -18,7 +18,6 @@ abstract class Source extends \lang\Object {
   /** @return string */
   public function name() { return $this->name; }
 
-
   /**
    * Returns this source's compound name, made up of the simple class
    * name of the respective implementation and the name in square

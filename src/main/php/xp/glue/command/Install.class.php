@@ -8,13 +8,14 @@ use webservices\json\JsonFactory;
 use lang\reflect\Package;
 use xp\glue\input\GlueFile;
 use xp\glue\Progress;
+use xp\glue\Dependency;
+use xp\glue\Installation;
 use util\profiling\Timer;
 
 /**
  * Install: Resolves dependencies, downloading and linking as necessary.
  */
 class Install extends Command {
-  const PW = 16;
   protected $sources= [];
 
   /**
@@ -33,84 +34,17 @@ class Install extends Command {
   }
 
   /**
-   * Fetch dependencies and returns URIs ready for adding to class path.
+   * Install dependencies and returns URIs ready for adding to class path.
    *
    * @param  io.Folder $libs target folder
-   * @param  [:xp.glue.Dependency] $dependencies
+   * @param  xp.glue.Dependency[] $dependencies
    * @return string[]
    */
-  protected function fetch(Folder $libs, $dependencies) {
-    $paths= [];
+  protected function install(Folder $libs, $dependencies) {
+    $installation= new Installation($this->sources, $dependencies);
+    $result= $installation->run($libs);
 
-    // Don't use foreach() here as that doesn't allow modification during iteration
-    while (list($module, $dependency)= each($dependencies)) {
-      $line= '[>>> '.str_repeat('.', self::PW).'] '.$module.' @ '.$dependency->required()->spec();
-      Console::write($line);
-
-      foreach ($this->sources as $source) {
-        if (null !== ($resolved= $source->fetch($dependency))) {
-          $name= $source->compoundName();
-          Console::writef(
-            ": %s %s%s[\033[44;1;37m200\033[0m ",
-            $name,
-            $resolved['project']->version(),
-            str_repeat("\x08", strlen($line) + strlen($name) + 1 + strlen($resolved['project']->version())+ 2)
-          );
-
-          $progress= new Progress(self::PW, '#');
-          $steps= sizeof($resolved['tasks']);
-          $vendor= new Folder($libs, $dependency->vendor());
-          foreach ($resolved['tasks'] as $i => $task) {
-            $paths[]= $task->perform(
-              $dependency,
-              $vendor,
-              function($percent) use($progress, $i, $steps) {
-                $progress->update($percent / $steps * ($i + 1));
-              }
-            );
-          }
-          $progress->update(100);
-          Console::writeLine();
-
-          // Register dependencies
-          foreach ($resolved['project']->dependencies() as $dependency) {
-            $key= $dependency->vendor().'/'.$dependency->name();
-            if (isset($dependencies[$key])) {
-
-              if (!$dependencies[$key]->required()->equals($dependency->required())) {
-                Console::writeLine('`- ', $key, ': ', $dependencies[$key], ' vs. ', $dependency);
-              }
-              // TODO: Check for conflicts!
-              continue;
-            }
-
-            $dependencies[$key]= $dependency;
-            // DEBUG Console::writeLine('`- ', $key, ' @ ', $dependency->required());
-          }
-          continue 2;
-        }
-      }
-
-      Console::writeLinef(
-        "%s[\033[41;1;37m404\033[0m ",
-        str_repeat("\x08", strlen($line))
-      );
-    }
-    return $paths;
-  }
-
-  /**
-   * Creates a key/value lookup map from a given list of dependencies
-   *
-   * @param  xp.glue.Dependency[] $dependencies
-   * @return [:xp.glue.Dependency] lookup map, keyed by $VENDOR/$NAME
-   */
-  protected function dependencyLookupOf($dependencies) {
-    $lookup= [];
-    foreach ($dependencies as $dependency) {
-      $lookup[$dependency->vendor().'/'.$dependency->name()]= $dependency;
-    }
-    return $lookup;
+    return $result['paths'];
   }
 
   /**
@@ -176,7 +110,7 @@ class Install extends Command {
       $count= $this->createPathFile(
         new File($cwd, 'glue.pth'),
         $cwd,
-        $this->fetch(new Folder($cwd, 'vendor'), $this->dependencyLookupOf($project->dependencies()))
+        $this->install(new Folder($cwd, 'vendor'), $project->dependencies())
       );
       $result= function() use($project, $count) {
         Console::writeLinef(
