@@ -6,6 +6,7 @@ use webservices\json\JsonException;
 use xp\glue\Project;
 use xp\glue\Dependency;
 use xp\glue\version\Requirement;
+use xp\glue\version\GlueSpec;
 
 /**
  * A gluefile contains project and version information as well as requirements.
@@ -24,12 +25,14 @@ use xp\glue\version\Requirement;
  */
 class GlueFile extends \lang\Object {
   protected $json;
+  protected $spec;
 
   /**
    * Constructor
    */
   public function __construct() {
     $this->json= JsonFactory::create();
+    $this->spec= new GlueSpec();
   }
 
   /**
@@ -73,7 +76,7 @@ class GlueFile extends \lang\Object {
     $dependencies= [];
     foreach ($config['require'] as $module => $required) {
       sscanf($module, "%[^/]/%[^\r]", $vendor, $name);
-      $dependencies[]= new Dependency($vendor, $name, new Requirement($required));
+      $dependencies[]= new Dependency($vendor, $name, $this->spec->parse($required));
     }
 
     sscanf($config['name'], "%[^/]/%[^\r]", $vendor, $name);
