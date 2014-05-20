@@ -77,7 +77,7 @@ class GlueSpec extends RequirementsParser {
         }
         $conditions[]= new CompareUsing($op, $limit);
       } else if ('!' === $specifier{0} && '=' === $specifier{1}) {
-        $conditions[]= new Exclude($this->normalize(substr($specifier, 2)));
+        $conditions[]= new Exclude($this->normalize($specifier, 2));
       } else {
         $conditions[]= new Equals($this->normalize($specifier));
       }
