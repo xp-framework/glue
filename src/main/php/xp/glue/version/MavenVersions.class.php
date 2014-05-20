@@ -26,9 +26,9 @@ class MavenVersions extends RequirementsParser {
       throw new FormatException('Invalid dependency versions: <empty>');
     }
 
-    if ('(' === $spec{0} || '[' === $spec{0}) {
+    if (isset($lo[$spec{0}])) {
       $l= strlen($spec) - 1;
-      if (')' === $spec{$l} || ']' === $spec{$l}) {
+      if (isset($hi[$spec{$l}])) {
         if (strstr($spec, ',')) {
           $limit= explode(',', substr($spec, 1, -1));
           if ('' !== $limit[0]) $conditions[]= new CompareUsing($lo[$spec{0}], $limit[0]);
