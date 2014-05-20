@@ -117,4 +117,13 @@ class Requirement extends \lang\Object {
   public function toString() {
     return $this->getClassName().'<'.$this->spec.'>';
   }
+
+  /**
+   * Returns whether another requirement is equal to this requirement
+   *
+   * @return bool
+   */
+  public function equals($cmp) {
+    return $cmp instanceof self && $cmp->spec === $this->spec;
+  }
 }

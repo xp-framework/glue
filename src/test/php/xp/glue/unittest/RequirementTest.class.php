@@ -129,4 +129,14 @@ class RequirementTest extends \unittest\TestCase {
   public function less_than_or_equal_to_not_matched_by($version) {
     $this->assertFalse((new Requirement('<=1.0'))->matches($version));
   }
+
+  #[@test, @values('validSpecs')]
+  public function equals_other_instance_with_same_spec($spec) {
+    $this->assertEquals(new Requirement($spec), new Requirement($spec));
+  }
+
+  #[@test, @values('validSpecs')]
+  public function not_equals_to_other_spec($spec) {
+    $this->assertNotEquals(new Requirement('6.10.0'), new Requirement($spec));
+  }
 }
