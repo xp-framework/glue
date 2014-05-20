@@ -45,7 +45,7 @@ class Artifactory extends Source {
    *
    * @param  var[] $results
    * @param  string[] $names
-   * @param  xp.glue.Requirement $required
+   * @param  xp.glue.version.Requirement $required
    * @return var Newest result matching
    */
   protected function select($results, $names, $required) {

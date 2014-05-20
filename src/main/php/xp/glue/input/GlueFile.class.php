@@ -5,7 +5,7 @@ use webservices\json\JsonFactory;
 use webservices\json\JsonException;
 use xp\glue\Project;
 use xp\glue\Dependency;
-use xp\glue\Requirement;
+use xp\glue\version\Requirement;
 
 /**
  * A gluefile contains project and version information as well as requirements.

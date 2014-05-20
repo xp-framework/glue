@@ -1,9 +1,9 @@
-<?php namespace xp\glue\unittest;
+<?php namespace xp\glue\unittest\version;
 
-use xp\glue\Requirement;
+use xp\glue\version\Requirement;
 
 /**
- * Tests the Requirement classes' basic functionality
+ * Tests the Requirement class' basic functionality
  */
 class RequirementTest extends \unittest\TestCase {
 

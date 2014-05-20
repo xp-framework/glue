@@ -1,4 +1,4 @@
-<?php namespace xp\glue;
+<?php namespace xp\glue\version;
 
 /**
  * Represents a version requirement
@@ -6,7 +6,8 @@
  * @see  https://getcomposer.org/doc/01-basic-usage.md#package-versions
  * @see  xp://xp.glue.Dependency
  * @see  php://version_compare
- * @test xp://xp.glue.unittest.RequirementTest
+ * @test xp://xp.glue.unittest.version.RequirementTest
+ * @test xp://xp.glue.unittest.version.RequirementMatchingTest
  */
 class Requirement extends \lang\Object {
   protected $spec;

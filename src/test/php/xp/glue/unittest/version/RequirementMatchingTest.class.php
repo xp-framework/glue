@@ -1,6 +1,6 @@
-<?php namespace xp\glue\unittest;
+<?php namespace xp\glue\unittest\version;
 
-use xp\glue\Requirement;
+use xp\glue\version\Requirement;
 
 /**
  * Tests the Requirement::matches() method

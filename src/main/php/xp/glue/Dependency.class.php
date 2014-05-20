@@ -1,5 +1,7 @@
 <?php namespace xp\glue;
 
+use xp\glue\version\Requirement;
+
 /**
  * Represents a project's dependency
  *
@@ -12,7 +14,7 @@ class Dependency extends \lang\Object {
    *
    * @param  string $vendor
    * @param  string $name
-   * @param  xp.glue.Requirement $required Version requirement
+   * @param  xp.glue.version.Requirement $required Version requirement
    */
   public function __construct($vendor, $name, Requirement $required) {
     $this->vendor= $vendor;
@@ -26,7 +28,7 @@ class Dependency extends \lang\Object {
   /** @return string */
   public function name() { return $this->name; }
 
-  /** @return xp.glue.Requirement */
+  /** @return xp.glue.version.Requirement */
   public function required() { return $this->required; }
 
   /**

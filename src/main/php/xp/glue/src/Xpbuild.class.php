@@ -5,9 +5,9 @@ use webservices\rest\RestRequest;
 use peer\http\HttpConnection;
 use peer\URL;
 use xp\glue\task\Download;
+use xp\glue\version\Requirement;
 use xp\glue\Project;
 use xp\glue\Dependency;
-use xp\glue\Requirement;
 
 /**
  * XP Build System source
@@ -33,7 +33,7 @@ class Xpbuild extends Source {
    * Select the newest release that matches the given requirement
    *
    * @param  [:var] $releases A map version => info
-   * @param  xp.glue.Requirement $requirement
+   * @param  xp.glue.version.Requirement $requirement
    * @param  string The selected version, or NULL
    */
   protected function select($releases, Requirement $requirement) {

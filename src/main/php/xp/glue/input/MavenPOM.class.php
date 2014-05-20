@@ -7,7 +7,7 @@ use xml\Tree;
 use io\streams\InputStream;
 use xp\glue\Project;
 use xp\glue\Dependency;
-use xp\glue\Requirement;
+use xp\glue\version\Requirement;
 
 class MavenPOM extends \lang\Object {
   protected $parser;
