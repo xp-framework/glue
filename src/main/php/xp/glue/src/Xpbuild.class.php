@@ -17,7 +17,14 @@ use xp\glue\Requirement;
 class Xpbuild extends Source {
   protected $rest;
 
-  public function __construct($base) {
+  /**
+   * Creates a new instance
+   *
+   * @param  string $name
+   * @param  string $base URL to artifactory (including, if necessary, auth)
+   */
+  public function __construct($name, $base) {
+    parent::__construct($name);
     $this->rest= new RestClient($base);
     // $this->rest->setTrace((new \util\log\LogCategory(''))->withAppender(new \util\log\ConsoleAppender()));
   }

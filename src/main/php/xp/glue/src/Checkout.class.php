@@ -12,7 +12,14 @@ use xp\glue\Dependency;
 class Checkout extends Source {
   protected $bases;
 
-  public function __construct($lookup) {
+  /**
+   * Creates a new instance 
+   *
+   * @param  string $name
+   * @param  string $lookup
+   */
+  public function __construct($name, $lookup) {
+    parent::__construct($name);
     $this->bases= [];
     foreach (explode('|', $lookup) as $spec) {
       sscanf($spec, '%[^@]@%[^|]', $vendor, $path);

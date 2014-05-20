@@ -11,7 +11,7 @@ use xp\glue\Progress;
 use util\profiling\Timer;
 
 /**
- * Install: Downloads dependencies
+ * Install: Resolves dependencies, downloading and linking as necessary.
  */
 class Install extends Command {
   const PW = 16;
@@ -28,7 +28,7 @@ class Install extends Command {
     $this->sources= [];
     foreach ($this->conf->readSection('sources') as $name => $url) {
       sscanf($name, '%[^@]@%s', $impl, $spec);
-      $this->sources[$name]= Package::forName('xp.glue.src')->loadClass(ucfirst($impl))->newInstance($url);
+      $this->sources[]= Package::forName('xp.glue.src')->loadClass(ucfirst($impl))->newInstance($spec, $url);
     }
   }
 
@@ -47,8 +47,9 @@ class Install extends Command {
       $line= '[>>> '.str_repeat('.', self::PW).'] '.$module.' @ '.$dependency->required()->spec();
       Console::write($line);
 
-      foreach ($this->sources as $name => $source) {
+      foreach ($this->sources as $source) {
         if (null !== ($resolved= $source->fetch($dependency))) {
+          $name= $source->compoundName();
           Console::writef(
             ": %s %s%s[\033[44;1;37m200\033[0m ",
             $name,
@@ -56,7 +57,6 @@ class Install extends Command {
             str_repeat("\x08", strlen($line) + strlen($name) + 1 + strlen($resolved['project']->version())+ 2)
           );
 
-          // Perform tasks
           $progress= new Progress(self::PW, '#');
           $steps= sizeof($resolved['tasks']);
           $vendor= new Folder($libs, $dependency->vendor());
@@ -77,6 +77,9 @@ class Install extends Command {
             $key= $dependency->vendor().'/'.$dependency->name();
             if (isset($dependencies[$key])) {
 
+              if (!$dependencies[$key]->required()->equals($dependency->required())) {
+                Console::writeLine('`- ', $key, ': ', $dependencies[$key], ' vs. ', $dependency);
+              }
               // TODO: Check for conflicts!
               continue;
             }
