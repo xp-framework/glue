@@ -26,6 +26,18 @@ class AllOf extends Condition {
   }
 
   /**
+   * Returns whether this condition evaluates to a fixed version
+   *
+   * @return bool
+   */
+  public function fixed() {
+    foreach ($this->conditions as $condition) {
+      if (!$condition->fixed()) return false;
+    }
+    return true;
+  }
+
+  /**
    * Returns whether a given input matches this condition
    *
    * @param  string $input

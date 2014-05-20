@@ -18,6 +18,15 @@ abstract class Condition extends \lang\Object {
   public abstract function spec();
 
   /**
+   * Returns whether this condition evaluates to a fixed version
+   *
+   * @return bool
+   */
+  public function fixed() {
+    return false;
+  }
+
+  /**
    * Returns whether another value is equal to this condition 
    *
    * @param  var $cmp

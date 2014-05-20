@@ -12,6 +12,9 @@ class Preferred extends Condition {
   /** @return string */
   public function spec() { return '?'.$this->value; }
 
+  /** @return bool */
+  public function fixed() { return true; }
+
   /**
    * Returns whether a given input matches this condition
    *

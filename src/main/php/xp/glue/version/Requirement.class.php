@@ -10,29 +10,22 @@
  * @test xp://xp.glue.unittest.version.RequirementMatchingTest
  */
 class Requirement extends \lang\Object {
-  protected $spec;
-  protected $compare;
   protected $condition;
 
   /**
    * Creates a new project instance
    *
    * @param  xp.glue.Condition $condition
-   * @param  bool $fixed
    */
-  public function __construct(Condition $condition, $fixed= false) {
-    $this->fixed= $fixed;
+  public function __construct(Condition $condition) {
     $this->condition= $condition;
   }
 
   /** @return string */
   public function spec() { return $this->condition->spec(); }
 
-  /** @return xp.glue.Condition */
-  public function condition() { return $this->condition; }
-
   /** @return bool */
-  public function fixed() { return $this->fixed; }
+  public function fixed() { return $this->condition->fixed(); }
 
   /**
    * Compares this requirement against a given version

@@ -49,7 +49,6 @@ class GlueSpec extends RequirementsParser {
    */
   public function parse($spec) {
     $conditions= [];
-    $fixed= false;
     foreach (explode(',', $spec) as $specifier) {
       $specifier= trim($specifier);
       if ('' === $specifier) {
@@ -81,7 +80,6 @@ class GlueSpec extends RequirementsParser {
         $conditions[]= new Exclude($this->normalize(substr($specifier, 2)));
       } else {
         $conditions[]= new Equals($this->normalize($specifier));
-        $fixed= true;
       }
     }
 
