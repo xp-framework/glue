@@ -1,16 +1,11 @@
 #!/bin/sh
 
-if [ "init" = "$1" ]; then
-  for pth in `ls -1 *.pth 2>/dev/null` ; do
-    mv $pth $pth.in
-  done
-fi
-
-GLUE=$(dirname "$(realpath "$0")")
-DIR=$(dirname "$0")
+CONFIG=$(dirname "$0")
+DIR=$(pwd)
 if [ "Windows_NT" = "$OS" ]; then
-  GLUE=$(cygpath -m "$GLUE")
+  CONFIG=$(cygpath -m "$CONFIG")
   DIR=$(cygpath -m "$DIR")
 fi
 
-xp -cp "$DIR" -cp "$GLUE/src/main/php" xp.glue.Glue "$@"
+cd "$(dirname "$(realpath "$0")")"
+xp xp.glue.Glue -c "$CONFIG/glue.ini" -d "$DIR" "$@"

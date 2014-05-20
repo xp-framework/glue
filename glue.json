@@ -1,0 +1,9 @@
+{
+  "name"    : "xp-framework/glue",
+  "version" : "0.0.4",
+  "require" : {
+    "xp-framework/webservices" : "~6.0",
+    "xp-framework/rest"        : "~6.0",
+    "xp-framework/http"        : "~6.0"
+  }
+}
