@@ -30,6 +30,7 @@ class MavenVersions extends RequirementsParser {
       $l= strlen($spec) - 1;
       if (isset($hi[$spec{$l}])) {
         if (strstr($spec, ',')) {
+          $conditions= [];
           $limit= explode(',', substr($spec, 1, -1));
           if ('' !== $limit[0]) $conditions[]= new CompareUsing($lo[$spec{0}], $limit[0]);
           if ('' !== $limit[1]) $conditions[]= new CompareUsing($hi[$spec{$l}], $limit[1]);
