@@ -23,7 +23,7 @@ class MavenVersions extends RequirementsParser {
     static $hi= [')' => '<', ']' => '<='];
 
     if ('' === $spec) {
-      throw new FormatException('Invalid dependency versions: <empty>');
+      throw new FormatException('Invalid dependency version: <empty>');
     }
 
     if (isset($lo[$spec{0}])) {
