@@ -11,12 +11,14 @@ use xp\glue\version\Requirement;
 
 class MavenPOM extends \lang\Object {
   protected $parser;
+  protected $versions;
 
   /**
    * Constructor
    */
   public function __construct() {
     $this->parser= new XMLParser();
+    $this->versions= new MavenVersions();
   }
 
   /**
@@ -48,7 +50,7 @@ class MavenPOM extends \lang\Object {
         $dependencies[]= new Dependency(
           $textOf($dep, 'pom:groupId'),
           $textOf($dep, 'pom:artifactId').($classifier ? '~'.$classifier : ''),
-          new Requirement($textOf($dep, 'pom:version'))
+          $this->versions->parse($textOf($dep, 'pom:version'))
         );
       }
 

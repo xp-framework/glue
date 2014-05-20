@@ -85,10 +85,6 @@ class GlueSpec extends RequirementsParser {
       }
     }
 
-    if (1 === sizeof($conditions)) {
-      return new Requirement($conditions[0], $fixed);
-    } else {
-      return new Requirement(new AllOf($conditions), $fixed);
-    }
+    return $this->requirementOf($conditions);
   }
 }
