@@ -1,6 +1,7 @@
 <?php namespace xp\glue\command;
 
 use xp\glue\input\MavenPOM;
+use xp\glue\input\GlueFile;
 use xp\glue\Project;
 use io\File;
 use io\Folder;
@@ -13,7 +14,11 @@ use lang\System;
 class Init extends Command {
 
   public function execute(array $args) {
-    if (file_exists('pom.xml')) {
+    if (file_exists('glue.json')) {
+      $project= (new GlueFile())->parse((new File('glue.json'))->getInputStream());
+      Console::writeLine('Project already initialized: ', $project);
+      return 1;
+    } else if (file_exists('pom.xml')) {
       $project= (new MavenPOM())->parse((new File('pom.xml'))->getInputStream());
       Console::writeLine('Importing Maven POM ', $project);
     } else {
