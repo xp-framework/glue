@@ -18,12 +18,13 @@ abstract class Condition extends \lang\Object {
   public abstract function spec();
 
   /**
-   * Returns whether this condition evaluates to a fixed version
+   * Returns the version number when  this condition evaluates to a fixed
+   * version, NULL otherwise.
    *
-   * @return bool
+   * @return string
    */
   public function fixed() {
-    return false;
+    return null;
   }
 
   /**

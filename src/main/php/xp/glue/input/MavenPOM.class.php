@@ -8,6 +8,7 @@ use io\streams\InputStream;
 use xp\glue\Project;
 use xp\glue\Dependency;
 use xp\glue\version\Requirement;
+use xp\glue\version\MavenVersions;
 
 class MavenPOM extends \lang\Object {
   protected $parser;

@@ -23,19 +23,18 @@ class RequirementTest extends \unittest\TestCase {
 
   #[@test, @values([
   #  new Equals('1.0.0'),
-  #  new Preferred('1.0.0'),
-  #  new AllOf([new Preferred('1.2.0'), new Preferred('1.3.0')])
+  #  new Preferred('1.0.0')
   #])]
-  public function fixed_accessor_returns_true_for($condition) {
-    $this->assertTrue((new Requirement($condition))->fixed());
+  public function fixed_accessor_returns_version_for($condition) {
+    $this->assertEquals('1.0.0', (new Requirement($condition))->fixed());
   }
 
   #[@test, @values([
   #  new Exclude('1.0.0'),
   #  new AllOf([new Preferred('1.2.0'), new Exclude('1.3.0')])
   #])]
-  public function fixed_accessor_returns_false_for($condition) {
-    $this->assertFalse((new Requirement($condition))->fixed());
+  public function fixed_accessor_returns_null_for($condition) {
+    $this->assertNull((new Requirement($condition))->fixed());
   }
 
   #[@test]

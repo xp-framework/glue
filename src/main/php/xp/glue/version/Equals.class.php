@@ -9,8 +9,8 @@ class Equals extends Condition {
   /** @return string */
   public function spec() { return $this->value; }
 
-  /** @return bool */
-  public function fixed() { return true; }
+  /** @return string */
+  public function fixed() { return $this->value; }
 
   /**
    * Returns whether a given input matches this condition

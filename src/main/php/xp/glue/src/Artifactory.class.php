@@ -92,8 +92,8 @@ class Artifactory extends Source {
 
     // Optimize case when we have a fixed version
     $required= $dependency->required();
-    if ($required->fixed()) {
-      $search->addParameter('v', $required->spec());
+    if (null !== ($fixed= $required->fixed())) {
+      $search->addParameter('v', $fixed);
     }
 
     $res= $this->rest->execute($search);
