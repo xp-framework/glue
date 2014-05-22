@@ -16,6 +16,8 @@ use util\profiling\Timer;
  * Install: Resolves dependencies, downloading and linking as necessary.
  */
 class Install extends Command {
+  const PW = 16;
+
   protected $sources= [];
 
   /**
@@ -40,9 +42,9 @@ class Install extends Command {
    * @param  xp.glue.Dependency[] $dependencies
    * @return string[]
    */
-  protected function install(Folder $libs, $dependencies) {
+  protected function install(Folder $libs, $dependencies, $status) {
     $installation= new Installation($this->sources, $dependencies);
-    $result= $installation->run($libs);
+    $result= $installation->run($libs, $status);
 
     return $result['paths'];
   }
@@ -107,11 +109,42 @@ class Install extends Command {
     $project= (new GlueFile())->parse((new File($cwd, 'glue.json'))->getInputStream());
 
     try {
-      $count= $this->createPathFile(
-        new File($cwd, 'glue.pth'),
-        $cwd,
-        $this->install(new Folder($cwd, 'vendor'), $project->dependencies())
-      );
+      $paths= $this->install(new Folder($cwd, 'vendor'), $project->dependencies(), [
+        'enter' => function($dependency, &$context) {
+          $l= sprintf(
+            '[>>> %s] %s @ %s',
+            str_repeat('.', self::PW),
+            $dependency->module(),
+            $dependency->required()->spec()
+          );
+          $context['l']= strlen($l);
+          Console::write($l);
+        },
+        'found' => function($dependency, $source, $resolved, &$context) {
+          $name= $source->compoundName();
+          Console::writef(
+            ": %s %s%s[\033[44;1;37m200\033[0m ",
+            $name,
+            $resolved['project']->version(),
+            str_repeat("\x08", $context['l'] + strlen($name) + 1 + strlen($resolved['project']->version())+ 2)
+          );
+        },
+        'start' => function($dependency, &$context) {
+          return new Progress(self::PW, '#');
+        },
+        'stop' => function($dependency, $progress, &$context) {
+          $progress->update(100);
+          Console::writeLine();
+        },
+        'error' => function($dependency, $code, &$context) {
+          Console::writeLinef(
+            "%s[\033[41;1;37m%s\033[0m ",
+            $code,
+            str_repeat("\x08", $context['l'])
+          );
+        }
+      ]);
+      $count= $this->createPathFile(new File($cwd, 'glue.pth'), $cwd, $paths);
       $result= function() use($project, $count) {
         Console::writeLinef(
           "\033[42;1;37mOK, %d dependencies processed, %d paths registered\033[0m",

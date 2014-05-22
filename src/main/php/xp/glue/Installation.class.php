@@ -2,7 +2,6 @@
 
 use io\Folder;
 use util\cmd\Console;
-use xp\glue\Progress;
 
 /**
  * Installs dependencies from a given list of sources.
@@ -10,8 +9,6 @@ use xp\glue\Progress;
  * @test  xp://xp.glue.unittest.InstallationTest
  */
 class Installation extends \lang\Object {
-  const PW = 16;
-
   protected $installed;
   protected $sources;
   protected $dependencies;
@@ -49,7 +46,7 @@ class Installation extends \lang\Object {
    * @param  io.Folder $target
    * @return string[]
    */
-  protected function register($parent, $transitive, $target) {
+  protected function register($parent, $transitive, $target, $status) {
     $conflicts= [];
     $paths= [];
     foreach ($transitive as $dependency) {
@@ -64,7 +61,7 @@ class Installation extends \lang\Object {
         $preceding= $dependency;
       }
 
-      $paths= array_merge($paths, $this->install($preceding, $target, $parent));
+      $paths= array_merge($paths, $this->install($preceding, $target, $parent, $status));
       if (!$preceding->required()->matches($this->installed[$module]['version'])) {
         $conflicts[]= [
           'module'   => $module,
@@ -97,12 +94,12 @@ class Installation extends \lang\Object {
    * @param  string $parent
    * @return string[]
    */
-  protected function install(Dependency $dependency, Folder $target, $parent= null) {
+  protected function install(Dependency $dependency, Folder $target, $parent, $status) {
     $module= $dependency->module();
     if (isset($this->installed[$module])) return [];
 
-    $line= '[>>> '.str_repeat('.', self::PW).'] '.$module.' @ '.$dependency->required()->spec();
-    Console::write($line);
+    $context= [];
+    isset($status['enter']) && $status['enter']($dependency, $context);
 
     $this->installed[$module]= ['by' => $parent, 'version' => '(recursion)'];
     foreach ($this->sources as $source) {
@@ -110,15 +107,9 @@ class Installation extends \lang\Object {
 
       $paths= [];
       $this->installed[$module]= ['by' => $parent, 'version' => $resolved['project']->version()];
-      $name= $source->compoundName();
-      Console::writef(
-        ": %s %s%s[\033[44;1;37m200\033[0m ",
-        $name,
-        $resolved['project']->version(),
-        str_repeat("\x08", strlen($line) + strlen($name) + 1 + strlen($resolved['project']->version())+ 2)
-      );
+      isset($status['found']) && $status['found']($dependency, $source, $resolved, $context);
 
-      $progress= new Progress(self::PW, '#');
+      $progress= isset($status['start']) ? $status['start']($dependency, $context) : null;
       $steps= sizeof($resolved['tasks']);
       $vendor= new Folder($target, $dependency->vendor());
       foreach ($resolved['tasks'] as $i => $task) {
@@ -126,24 +117,21 @@ class Installation extends \lang\Object {
           $dependency,
           $vendor,
           function($percent) use($progress, $i, $steps) {
-            $progress->update($percent / $steps * ($i + 1));
+            $progress && $progress->update($percent / $steps * ($i + 1));
           }
         );
       }
-      $progress->update(100);
-      Console::writeLine();
+      isset($status['stop']) && $status['stop']($dependency, $progress, $context);
 
       return array_merge($paths, $this->register(
         $module,
         $resolved['project']->dependencies(),
-        $target
+        $target,
+        $status
       ));
     }
 
-    Console::writeLinef(
-      "%s[\033[41;1;37m404\033[0m ",
-      str_repeat("\x08", strlen($line))
-    );
+    isset($status['error']) && $status['error']($dependency, 404, $context);
     return [];
   }
 
@@ -153,10 +141,10 @@ class Installation extends \lang\Object {
    * @param  io.Folder $target
    * @return var The installation's result
    */
-  public function run(Folder $target) {
+  public function run(Folder $target, $status= []) {
     $paths= [];
     foreach ($this->dependencies as $dependency) {
-      $paths= array_merge($paths, $this->install($dependency, $target));
+      $paths= array_merge($paths, $this->install($dependency, $target, null, $status));
     }
     return ['paths' => $paths];
   }
