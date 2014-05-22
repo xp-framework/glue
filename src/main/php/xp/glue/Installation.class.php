@@ -4,6 +4,11 @@ use io\Folder;
 use util\cmd\Console;
 use xp\glue\Progress;
 
+/**
+ * Installs dependencies from a given list of sources.
+ *
+ * @test  xp://xp.glue.unittest.InstallationTest
+ */
 class Installation extends \lang\Object {
   const PW = 16;
 
