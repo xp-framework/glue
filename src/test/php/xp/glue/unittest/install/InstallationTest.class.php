@@ -45,6 +45,23 @@ class InstallationTest extends \unittest\TestCase {
   }
 
   #[@test]
+  public function installing_dependency_twice_only_returns_it_once() {
+    $local= new Folder('local-checkout');
+    $source= new TestSource([
+      'test/test' => [
+        'project' => new Project('test', 'test', '1.0.0', []),
+        'tasks'   => [new LinkTo(new Folder($local))]
+      ]
+    ]);
+
+    $r= new Installation([$source], [
+      new Dependency('test', 'test', $this->spec->parse('1.*')),
+      new Dependency('test', 'test', $this->spec->parse('1.*'))
+    ]);
+    $this->assertEquals(['paths' => [$local->getURI()]], $r->run($this->temp));
+  }
+
+  #[@test]
   public function install_dependency_with_dependency() {
     $local= new Folder('local-checkout');
     $source= new TestSource([
