@@ -101,12 +101,12 @@ class Installation extends \lang\Object {
     $context= [];
     isset($status['enter']) && $status['enter']($dependency, $context);
 
-    $this->installed[$module]= ['by' => $parent, 'version' => '(recursion)'];
+    $this->installed[$module]= ['by' => $parent];
     foreach ($this->sources as $source) {
       if (null === ($resolved= $source->fetch($dependency))) continue;
 
       $paths= [];
-      $this->installed[$module]= ['by' => $parent, 'version' => $resolved['project']->version()];
+      $this->installed[$module]['version']= $resolved['project']->version();
       isset($status['found']) && $status['found']($dependency, $source, $resolved, $context);
 
       $progress= isset($status['start']) ? $status['start']($dependency, $context) : null;
