@@ -1,8 +1,6 @@
 <?php namespace xp\glue;
 
 use io\Folder;
-use util\cmd\Console;
-use xp\glue\src\Source;
 
 /**
  * Installs dependencies from a given list of sources.
