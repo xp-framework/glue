@@ -69,4 +69,39 @@ class InstallationTest extends \unittest\TestCase {
       $r->run($this->temp)
     );
   }
+
+  #[@test]
+  public function handles_recursion() {
+    $local= new Folder('local-checkout');
+    $source= new TestSource([
+      'test/test' => [
+        'project' => new Project('test', 'test', '1.0.0', [
+          new Dependency('test', 'transitive', $this->spec->parse('2.0.8'))
+        ]),
+        'tasks'   => [new LinkTo(new Folder($local, 'test'))]
+      ],
+      'test/transitive' => [
+        'project' => new Project('test', 'transitive', '2.0.8', [
+          new Dependency('test', 'recursion', $this->spec->parse('6.6.6'))
+        ]),
+        'tasks'   => [new LinkTo(new Folder($local, 'transitive'))]
+      ],
+      'test/recursion' => [
+        'project' => new Project('test', 'recursion', '6.6.6', [
+          new Dependency('test', 'test', $this->spec->parse('~1.0'))
+        ]),
+        'tasks'   => [new LinkTo(new Folder($local, 'recursion'))]
+      ],
+    ]);
+
+    $r= new Installation([$source], [new Dependency('test', 'test', $this->spec->parse('1.*'))]);
+    $this->assertEquals(
+      ['paths' => [
+        (new Folder($local, 'test'))->getURI(),
+        (new Folder($local, 'transitive'))->getURI(),
+        (new Folder($local, 'recursion'))->getURI()
+      ]],
+      $r->run($this->temp)
+    );
+  }
 }
