@@ -51,6 +51,7 @@ class Installation extends \lang\Object {
    * @param  string $parent
    * @param  xp.glue.Dependency[] $transitive
    * @param  io.Folder $target
+   * @param  xp.glue.InstallationStatus $status
    * @return string[]
    */
   protected function register($parent, $transitive, $target, $status) {
@@ -92,6 +93,7 @@ class Installation extends \lang\Object {
    * @param  xp.glue.Dependency $dependency
    * @param  io.Folder $target
    * @param  string $parent
+   * @param  xp.glue.InstallationStatus $status
    * @return string[]
    */
   protected function install(Dependency $dependency, Folder $target, $parent, $status) {
