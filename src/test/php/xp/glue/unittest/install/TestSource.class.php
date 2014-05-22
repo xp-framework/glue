@@ -2,9 +2,21 @@
 
 use xp\glue\src\Source;
 use xp\glue\Dependency;
+use xp\glue\Project;
 
 /**
  * Dummy test source used by InstallationTest
+ *
+ * ## Example usage
+ *
+ * ```php
+ * new TestSource([
+ *   'test/test@1.0.0' => [
+ *     'depend'  => [new Dependency(...)],
+ *     'tasks'   => [new LinkTo(...)]
+ *   ]
+ * ]);
+ * ```
  */
 class TestSource extends Source {
   protected $results;
@@ -15,7 +27,13 @@ class TestSource extends Source {
    * @param  [:var] results
    */
   public function __construct(array $results) {
-    $this->results= $results;
+    foreach ($results as $vmodule => $def) {
+      sscanf($vmodule, '%[^/]/%[^@]@%s', $vendor, $name, $version);
+      $this->results[$vendor.'/'.$name]= [
+        'project' => new Project($vendor, $name, $version, $def['depend']),
+        'tasks'   => $def['tasks']
+      ];
+    }
   }
 
   /**

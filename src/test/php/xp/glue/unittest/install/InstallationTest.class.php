@@ -34,8 +34,8 @@ class InstallationTest extends \unittest\TestCase {
   public function install_dependency() {
     $local= new Folder('local-checkout');
     $source= new TestSource([
-      'test/test' => [
-        'project' => new Project('test', 'test', '1.0.0', []),
+      'test/test@1.0.0' => [
+        'depend'  => [],
         'tasks'   => [new LinkTo(new Folder($local))]
       ]
     ]);
@@ -48,8 +48,8 @@ class InstallationTest extends \unittest\TestCase {
   public function installing_dependency_twice_only_returns_it_once() {
     $local= new Folder('local-checkout');
     $source= new TestSource([
-      'test/test' => [
-        'project' => new Project('test', 'test', '1.0.0', []),
+      'test/test@1.0.0' => [
+        'depend'  => [],
         'tasks'   => [new LinkTo(new Folder($local))]
       ]
     ]);
@@ -65,14 +65,12 @@ class InstallationTest extends \unittest\TestCase {
   public function install_dependency_with_dependency() {
     $local= new Folder('local-checkout');
     $source= new TestSource([
-      'test/test' => [
-        'project' => new Project('test', 'test', '1.0.0', [
-          new Dependency('test', 'transitive', $this->spec->parse('2.0.8'))
-        ]),
+      'test/test@1.0.0' => [
+        'depend'  => [new Dependency('test', 'transitive', $this->spec->parse('2.0.8'))],
         'tasks'   => [new LinkTo(new Folder($local, 'test'))]
       ],
-      'test/transitive' => [
-        'project' => new Project('test', 'transitive', '2.0.8', []),
+      'test/transitive@2.0.8' => [
+        'depend'  => [],
         'tasks'   => [new LinkTo(new Folder($local, 'transitive'))]
       ]
     ]);
@@ -91,24 +89,18 @@ class InstallationTest extends \unittest\TestCase {
   public function handles_recursion() {
     $local= new Folder('local-checkout');
     $source= new TestSource([
-      'test/test' => [
-        'project' => new Project('test', 'test', '1.0.0', [
-          new Dependency('test', 'transitive', $this->spec->parse('2.0.8'))
-        ]),
+      'test/test@1.0.0' => [
+        'depend'  => [new Dependency('test', 'transitive', $this->spec->parse('2.0.8'))],
         'tasks'   => [new LinkTo(new Folder($local, 'test'))]
       ],
-      'test/transitive' => [
-        'project' => new Project('test', 'transitive', '2.0.8', [
-          new Dependency('test', 'recursion', $this->spec->parse('6.6.6'))
-        ]),
+      'test/transitive@2.0.8' => [
+        'depend'  => [new Dependency('test', 'recursion', $this->spec->parse('6.6.6'))],
         'tasks'   => [new LinkTo(new Folder($local, 'transitive'))]
       ],
-      'test/recursion' => [
-        'project' => new Project('test', 'recursion', '6.6.6', [
-          new Dependency('test', 'test', $this->spec->parse('~1.0'))
-        ]),
+      'test/recursion@6.6.6' => [
+        'depend'  => [new Dependency('test', 'test', $this->spec->parse('~1.0'))],
         'tasks'   => [new LinkTo(new Folder($local, 'recursion'))]
-      ],
+      ]
     ]);
 
     $r= new Installation([$source], [new Dependency('test', 'test', $this->spec->parse('1.*'))]);
