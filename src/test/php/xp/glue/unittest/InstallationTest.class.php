@@ -33,15 +33,40 @@ class InstallationTest extends \unittest\TestCase {
   #[@test]
   public function install_dependency() {
     $local= new Folder('local-checkout');
-    $source= newinstance('xp.glue.src.Source', [], [
-      'fetch' => function(Dependency $d) use($local) {
-        return [
-          'project' => new Project($d->vendor(), $d->name(), '1.0.0', []),
-          'tasks'   => [new LinkTo($local)]
-        ];
-      }
+    $source= new TestSource([
+      'test/test' => [
+        'project' => new Project('test', 'test', '1.0.0', []),
+        'tasks'   => [new LinkTo(new Folder($local))]
+      ]
     ]);
+
     $r= new Installation([$source], [new Dependency('test', 'test', $this->spec->parse('1.*'))]);
     $this->assertEquals(['paths' => [$local->getURI()]], $r->run($this->temp));
+  }
+
+  #[@test]
+  public function install_dependency_with_dependency() {
+    $local= new Folder('local-checkout');
+    $source= new TestSource([
+      'test/test' => [
+        'project' => new Project('test', 'test', '1.0.0', [
+          new Dependency('test', 'transitive', $this->spec->parse('2.0.8'))
+        ]),
+        'tasks'   => [new LinkTo(new Folder($local, 'test'))]
+      ],
+      'test/transitive' => [
+        'project' => new Project('test', 'transitive', '2.0.8', []),
+        'tasks'   => [new LinkTo(new Folder($local, 'transitive'))]
+      ]
+    ]);
+
+    $r= new Installation([$source], [new Dependency('test', 'test', $this->spec->parse('1.*'))]);
+    $this->assertEquals(
+      ['paths' => [
+        (new Folder($local, 'test'))->getURI(),
+        (new Folder($local, 'transitive'))->getURI()
+      ]],
+      $r->run($this->temp)
+    );
   }
 }
