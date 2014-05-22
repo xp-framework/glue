@@ -2,6 +2,7 @@
 
 use io\Folder;
 use util\cmd\Console;
+use xp\glue\src\Source;
 
 /**
  * Installs dependencies from a given list of sources.
@@ -9,9 +10,15 @@ use util\cmd\Console;
  * @test  xp://xp.glue.unittest.InstallationTest
  */
 class Installation extends \lang\Object {
+  protected static $NO_STATUS;
+
   protected $installed;
   protected $sources;
   protected $dependencies;
+
+  static function __static() {
+    self::$NO_STATUS= new NoInstallationStatus();
+  }
 
   /**
    * Creates a new installation
@@ -72,15 +79,8 @@ class Installation extends \lang\Object {
       }
     }
 
-    foreach ($conflicts as $conflict) {
-      Console::writeLinef(
-        '`- Conflict: %s requires %s @ %s, but %s in use by %s',
-        $parent,
-        $conflict['module'],
-        $conflict['required'],
-        $conflict['used'],
-        $conflict['by'] ?: 'project'
-      );
+    if (!empty($conflicts)) {
+      $status->conflicts($parent, $conflicts);
     }
 
     return $paths;
@@ -98,8 +98,7 @@ class Installation extends \lang\Object {
     $module= $dependency->module();
     if (isset($this->installed[$module])) return [];
 
-    $context= [];
-    isset($status['enter']) && $status['enter']($dependency, $context);
+    $status->enter($dependency);
 
     $this->installed[$module]= ['by' => $parent];
     foreach ($this->sources as $source) {
@@ -107,21 +106,21 @@ class Installation extends \lang\Object {
 
       $paths= [];
       $this->installed[$module]['version']= $resolved['project']->version();
-      isset($status['found']) && $status['found']($dependency, $source, $resolved, $context);
+      $status->found($dependency, $source, $resolved['project']);
 
-      $progress= isset($status['start']) ? $status['start']($dependency, $context) : null;
+      $status->start($dependency);
       $steps= sizeof($resolved['tasks']);
       $vendor= new Folder($target, $dependency->vendor());
       foreach ($resolved['tasks'] as $i => $task) {
         $paths[]= $task->perform(
           $dependency,
-          $vendor,
-          function($percent) use($progress, $i, $steps) {
-            $progress && $progress->update($percent / $steps * ($i + 1));
+          $vendor,          
+          function($percent) use($dependency, $status, $i, $steps) {
+            $status->update($dependency, $percent / $steps * ($i + 1));
           }
         );
       }
-      isset($status['stop']) && $status['stop']($dependency, $progress, $context);
+      $status->stop($dependency);
 
       return array_merge($paths, $this->register(
         $module,
@@ -131,7 +130,7 @@ class Installation extends \lang\Object {
       ));
     }
 
-    isset($status['error']) && $status['error']($dependency, 404, $context);
+    $status->error($dependency, 404);
     return [];
   }
 
@@ -139,10 +138,12 @@ class Installation extends \lang\Object {
    * Run this installation
    *
    * @param  io.Folder $target
+   * @param  xp.glue.InstallationStatus $status
    * @return var The installation's result
    */
-  public function run(Folder $target, $status= []) {
+  public function run(Folder $target, InstallationStatus $status= null) {
     $paths= [];
+    $status || $status= self::$NO_STATUS;
     foreach ($this->dependencies as $dependency) {
       $paths= array_merge($paths, $this->install($dependency, $target, null, $status));
     }

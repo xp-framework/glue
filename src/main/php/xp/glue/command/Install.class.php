@@ -7,7 +7,9 @@ use util\Properties;
 use webservices\json\JsonFactory;
 use lang\reflect\Package;
 use xp\glue\input\GlueFile;
+use xp\glue\src\Source;
 use xp\glue\Progress;
+use xp\glue\Project;
 use xp\glue\Dependency;
 use xp\glue\Installation;
 use util\profiling\Timer;
@@ -16,8 +18,6 @@ use util\profiling\Timer;
  * Install: Resolves dependencies, downloading and linking as necessary.
  */
 class Install extends Command {
-  const PW = 16;
-
   protected $sources= [];
 
   /**
@@ -96,6 +96,63 @@ class Install extends Command {
     return $exit;
   }
 
+  /** @return xp.glue.InstallationStatus */
+  protected function status() {
+    return newinstance('xp.glue.InstallationStatus', [], [
+      'PW'        => 16,
+      'offset'    => null,
+      'progress'  => null,
+      'enter'     => function(Dependency $dependency) {
+        $l= sprintf(
+          '[>>> %s] %s @ %s',
+          str_repeat('.', $this->PW),
+          $dependency->module(),
+          $dependency->required()->spec()
+        );
+        $this->offset= strlen($l);
+        Console::write($l);
+      },
+      'found'     => function(Dependency $dependency, Source $source, Project $project) {
+        $name= $source->compoundName();
+        Console::writef(
+          ": %s %s%s[\033[44;1;37m200\033[0m ",
+          $name,
+          $project->version(),
+          str_repeat("\x08", $this->offset + strlen($name) + 1 + strlen($project->version())+ 2)
+        );
+      },
+      'start'     => function(Dependency $dependency) {
+        $this->progress= new Progress($this->PW, '#');
+      },
+      'update'    => function(Dependency $dependency, $percent) {
+        $this->progress->update($percent);
+      },
+      'stop'      => function(Dependency $dependency) {
+        $this->progress->update(100);
+        Console::writeLine();
+      },
+      'error'     => function(Dependency $dependency, $code) {
+        Console::writeLinef(
+          "%s[\033[41;1;37m%s\033[0m ",
+          $code,
+          str_repeat("\x08", $this->offset)
+        );
+      },
+      'conflicts' => function($parent, array $conflicts) {
+        foreach ($conflicts as $conflict) {
+          Console::writeLinef(
+            '`- Conflict: %s requires %s @ %s, but %s in use by %s',
+            $parent,
+            $conflict['module'],
+            $conflict['required'],
+            $conflict['used'],
+            $conflict['by'] ?: 'project'
+          );
+        }
+      }
+    ]);
+  }
+
   /**
    * Execute this action
    *
@@ -109,41 +166,7 @@ class Install extends Command {
     $project= (new GlueFile())->parse((new File($cwd, 'glue.json'))->getInputStream());
 
     try {
-      $paths= $this->install(new Folder($cwd, 'vendor'), $project->dependencies(), [
-        'enter' => function($dependency, &$context) {
-          $l= sprintf(
-            '[>>> %s] %s @ %s',
-            str_repeat('.', self::PW),
-            $dependency->module(),
-            $dependency->required()->spec()
-          );
-          $context['l']= strlen($l);
-          Console::write($l);
-        },
-        'found' => function($dependency, $source, $resolved, &$context) {
-          $name= $source->compoundName();
-          Console::writef(
-            ": %s %s%s[\033[44;1;37m200\033[0m ",
-            $name,
-            $resolved['project']->version(),
-            str_repeat("\x08", $context['l'] + strlen($name) + 1 + strlen($resolved['project']->version())+ 2)
-          );
-        },
-        'start' => function($dependency, &$context) {
-          return new Progress(self::PW, '#');
-        },
-        'stop' => function($dependency, $progress, &$context) {
-          $progress->update(100);
-          Console::writeLine();
-        },
-        'error' => function($dependency, $code, &$context) {
-          Console::writeLinef(
-            "%s[\033[41;1;37m%s\033[0m ",
-            $code,
-            str_repeat("\x08", $context['l'])
-          );
-        }
-      ]);
+      $paths= $this->install(new Folder($cwd, 'vendor'), $project->dependencies(), $this->status());
       $count= $this->createPathFile(new File($cwd, 'glue.pth'), $cwd, $paths);
       $result= function() use($project, $count) {
         Console::writeLinef(
