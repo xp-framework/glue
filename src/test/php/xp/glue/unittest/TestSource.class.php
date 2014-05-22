@@ -19,8 +19,8 @@ class TestSource extends \xp\glue\src\Source {
    * @return var
    */
   public function fetch(\xp\glue\Dependency $d) {
-    return isset($this->results[$d->compoundName()])
-      ? $this->results[$d->compoundName()]
+    return isset($this->results[$d->module()])
+      ? $this->results[$d->module()]
       : null
     ;
   }

@@ -27,7 +27,7 @@ class Installation extends \lang\Object {
     $this->sources= $sources;
     $this->dependencies= [];
     foreach ($dependencies as $dependency) {
-      $this->dependencies[$dependency->compoundName()]= $dependency;
+      $this->dependencies[$dependency->module()]= $dependency;
     }
   }
 
@@ -53,7 +53,7 @@ class Installation extends \lang\Object {
     $conflicts= [];
     $paths= [];
     foreach ($transitive as $dependency) {
-      $module= $dependency->compoundName();
+      $module= $dependency->module();
 
       // Make the requirements defined inside the installation directly 
       // precede over any transitive dependency. Think of this like
@@ -98,7 +98,7 @@ class Installation extends \lang\Object {
    * @return string[]
    */
   protected function install(Dependency $dependency, Folder $target, $parent= null) {
-    $module= $dependency->compoundName();
+    $module= $dependency->module();
     if (isset($this->installed[$module])) return [];
 
     $line= '[>>> '.str_repeat('.', self::PW).'] '.$module.' @ '.$dependency->required()->spec();

@@ -37,7 +37,7 @@ class Dependency extends \lang\Object {
    *
    * @return  string
    */
-  public function compoundName() {
+  public function module() {
     return $this->vendor.'/'.$this->name;
   }
 
