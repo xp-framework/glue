@@ -5,7 +5,7 @@ use io\Folder;
 /**
  * Installs dependencies from a given list of sources.
  *
- * @test  xp://xp.glue.unittest.InstallationTest
+ * @test  xp://xp.glue.unittest.install.InstallationTest
  */
 class Installation extends \lang\Object {
   protected static $NO_STATUS;

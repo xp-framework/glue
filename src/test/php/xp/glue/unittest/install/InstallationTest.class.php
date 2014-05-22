@@ -1,4 +1,4 @@
-<?php namespace xp\glue\unittest;
+<?php namespace xp\glue\unittest\install;
 
 use io\Folder;
 use xp\glue\Installation;
