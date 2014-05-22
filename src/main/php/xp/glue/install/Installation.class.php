@@ -1,6 +1,7 @@
-<?php namespace xp\glue;
+<?php namespace xp\glue\install;
 
 use io\Folder;
+use xp\glue\Dependency;
 
 /**
  * Installs dependencies from a given list of sources.
@@ -97,7 +98,6 @@ class Installation extends \lang\Object {
   protected function install(Dependency $dependency, Folder $target, $parent, $status) {
     $module= $dependency->module();
     if (isset($this->installed[$module])) return [];
-
     $status->enter($dependency);
 
     $this->installed[$module]= ['by' => $parent];
@@ -138,10 +138,10 @@ class Installation extends \lang\Object {
    * Run this installation
    *
    * @param  io.Folder $target
-   * @param  xp.glue.InstallationStatus $status
+   * @param  xp.glue.install.Status $status
    * @return var The installation's result
    */
-  public function run(Folder $target, InstallationStatus $status= null) {
+  public function run(Folder $target, Status $status= null) {
     $paths= [];
     $status || $status= self::$NO_STATUS;
     foreach ($this->dependencies as $dependency) {

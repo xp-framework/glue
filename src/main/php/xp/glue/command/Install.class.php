@@ -11,7 +11,7 @@ use xp\glue\src\Source;
 use xp\glue\Progress;
 use xp\glue\Project;
 use xp\glue\Dependency;
-use xp\glue\Installation;
+use xp\glue\install\Installation;
 use util\profiling\Timer;
 
 /**
@@ -96,9 +96,9 @@ class Install extends Command {
     return $exit;
   }
 
-  /** @return xp.glue.InstallationStatus */
+  /** @return xp.glue.install.Status */
   protected function status() {
-    return newinstance('xp.glue.InstallationStatus', [], [
+    return newinstance('xp.glue.install.Status', [], [
       'PW'        => 16,
       'offset'    => null,
       'progress'  => null,

@@ -1,8 +1,14 @@
-<?php namespace xp\glue;
+<?php namespace xp\glue\install;
 
 use xp\glue\src\Source;
+use xp\glue\Dependency;
+use xp\glue\Project;
 
-interface InstallationStatus {
+/**
+ * The installation status interface provides a contract for hooks inside
+ * the installation process.
+ */
+interface Status {
 
   public function enter(Dependency $dep);
 

@@ -1,8 +1,10 @@
-<?php namespace xp\glue;
+<?php namespace xp\glue\install;
 
 use xp\glue\src\Source;
+use xp\glue\Dependency;
+use xp\glue\Project;
 
-class NoInstallationStatus extends \lang\Object implements InstallationStatus {
+class NoInstallationStatus extends \lang\Object implements Status {
 
   public function enter(Dependency $dep) { }
 

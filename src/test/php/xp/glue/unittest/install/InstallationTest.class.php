@@ -1,9 +1,9 @@
 <?php namespace xp\glue\unittest\install;
 
 use io\Folder;
-use xp\glue\Installation;
 use xp\glue\Dependency;
 use xp\glue\Project;
+use xp\glue\install\Installation;
 use xp\glue\task\LinkTo;
 use xp\glue\version\GlueSpec;
 
