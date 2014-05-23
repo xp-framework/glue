@@ -22,7 +22,7 @@ class Install extends Command {
    *
    * @param  io.Folder $libs target folder
    * @param  xp.glue.Dependency[] $dependencies
-   * @return string[]
+   * @return [:var] Installation result
    */
   protected function install(Folder $libs, $dependencies) {
     return (new Installation($this->sources, $dependencies))->run($libs, new InstallationStatus());
