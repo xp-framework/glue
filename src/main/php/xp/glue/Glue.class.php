@@ -25,7 +25,7 @@ class Glue extends \lang\Object {
         break;
       }
     }
-    return ['config' => $config, 'method' => ucfirst($method)];
+    return ['config' => $config, 'method' => ucfirst($method), 'args' => array_slice($args, $i + 1)];
   }
 
   /**
@@ -39,7 +39,7 @@ class Glue extends \lang\Object {
     try {
       $command= Package::forName('xp.glue.command')->loadClass($parsed['method'])->newInstance();
       $command->configure(new Properties($parsed['config']));
-      $command->execute($args);
+      $command->execute($parsed['args']);
       return 0;
     } catch (\lang\Throwable $e) {
       Console::$err->writeLine('*** ', ucfirst($method), ': ', $e);
