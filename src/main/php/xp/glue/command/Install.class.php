@@ -11,6 +11,8 @@ use xp\glue\src\Source;
 use xp\glue\Progress;
 use xp\glue\Project;
 use xp\glue\Dependency;
+use xp\glue\version\Requirement;
+use xp\glue\version\Equals;
 use xp\glue\install\Installation;
 use util\profiling\Timer;
 
@@ -52,10 +54,8 @@ class Install extends Command {
    * @param  io.File $file
    * @param  io.Folder $cwd
    * @param  string[] $paths
-   * @return int
    */
   protected function createPathFile($file, $cwd, array $paths) {
-    $count= 0;
     $pth= $file->getOutputStream();
     $base= $cwd->getURI();
     foreach ($paths as $path) {
@@ -65,10 +65,29 @@ class Install extends Command {
         $entry= $path;
       }
       $pth->write($entry."\n");
-      $count++;
     }
     $pth->close();
-    return $count;
+  }
+
+  /**
+   * Creates a glue.lock file.
+   *
+   * @param  io.File $file
+   * @param  io.Folder $cwd
+   * @param  string[] $installed
+   */
+  protected function createLockFile($file, $cwd, array $installed) {
+    with ($lock= $file->getOutputStream()); {
+      $lock->write("{\n");
+      $s= sizeof($installed);
+      $i= 0;
+      foreach ($installed as $module => $def) {
+        $lock->write('  "'.$module.'": "'.$def['version'].'"');
+        if (++$i < $s) $lock->write(",\n");
+      }
+      $lock->write("\n}\n");
+      $lock->close();
+    }
   }
 
   /**
@@ -151,6 +170,29 @@ class Install extends Command {
   }
 
   /**
+   * Gets the project in the given folder
+   *
+   * @param  io.Folder $origin
+   * @return xp.glue.Project
+   * @throws io.FileNotFoundException if no project can be found
+   */
+  protected function projectIn($origin) {
+    $project= (new GlueFile())->parse((new File($origin, 'glue.json'))->getInputStream());
+
+    $lock= new File($origin, 'glue.lock');
+    if ($lock->exists()) {
+      $dependencies= [];
+      foreach (self::$json->decodeFrom($lock->getInputStream()) as $module => $version) {
+        sscanf($module, "%[^/]/%[^\r]", $vendor, $name);
+        $dependencies[]= new Dependency($vendor, $name, new Requirement(new Equals($version)));
+      }
+      return new Project($project->vendor(), $project->name(), $project->version(), $dependencies);
+    } else {
+      return $project;
+    }
+  }
+
+  /**
    * Execute this action
    *
    * @param  string[] $args
@@ -160,18 +202,20 @@ class Install extends Command {
     $timer->start();
 
     $cwd= new Folder('.');
-    $project= (new GlueFile())->parse((new File($cwd, 'glue.json'))->getInputStream());
+    $project= $this->projectIn($cwd);
+    // Console::writeLine($project);
 
     try {
-      $result= $this->install(new Folder($cwd, 'vendor'), $project->dependencies(), $this->status());
-      $this->createPathFile(new File($cwd, 'glue.pth'), $cwd, $result['paths']);
+      $installation= $this->install(new Folder($cwd, 'vendor'), $project->dependencies(), $this->status());
+      $this->createPathFile(new File($cwd, 'glue.pth'), $cwd, $installation['paths']);
+      $this->createLockFile(new File($cwd, 'glue.lock'), $cwd, $installation['installed']);
 
-      $result= function() use($project, $result) {
+      $result= function() use($project, $installation) {
         Console::writeLinef(
           "\033[42;1;37mOK, %d dependencies processed, %d modules installed, %d paths registered\033[0m",
           sizeof($project->dependencies()),
-          sizeof($result['installed']),
-          sizeof($result['paths'])
+          sizeof($installation['installed']),
+          sizeof($installation['paths'])
         );
       };
     } catch (\lang\Throwable $t) {
