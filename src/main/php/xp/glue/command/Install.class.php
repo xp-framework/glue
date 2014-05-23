@@ -3,9 +3,6 @@
 use io\File;
 use io\Folder;
 use util\cmd\Console;
-use util\Properties;
-use webservices\json\JsonFactory;
-use lang\reflect\Package;
 use xp\glue\input\GlueFile;
 use xp\glue\src\Source;
 use xp\glue\Project;
@@ -19,22 +16,6 @@ use util\profiling\Timer;
  * Install: Resolves dependencies, downloading and linking as necessary.
  */
 class Install extends Command {
-  protected $sources= [];
-
-  /**
-   * Configure this command
-   *
-   * @param  util.Properties $conf
-   * @return void
-   */
-  public function configure(Properties $conf) {
-    parent::configure($conf);
-    $this->sources= [];
-    foreach ($this->conf->readSection('sources') as $name => $url) {
-      sscanf($name, '%[^@]@%s', $impl, $spec);
-      $this->sources[]= Package::forName('xp.glue.src')->loadClass(ucfirst($impl))->newInstance($spec, $url);
-    }
-  }
 
   /**
    * Install dependencies and returns URIs ready for adding to class path.
