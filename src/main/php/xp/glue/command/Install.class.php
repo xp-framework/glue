@@ -51,22 +51,22 @@ class Install extends Command {
   /**
    * Creates a .pth file. Uses relative path entries whenever possible.
    *
-   * @param  io.File $file
    * @param  io.Folder $cwd
    * @param  string[] $paths
    */
-  protected function createPathFile($file, $cwd, array $paths) {
-    $pth= $file->getOutputStream();
-    $base= $cwd->getURI();
-    foreach ($paths as $path) {
-      if (0 === substr_compare($base, $path, 0, strlen($base))) {
-        $entry= str_replace(DIRECTORY_SEPARATOR, '/', substr($path, strlen($base)));
-      } else {
-        $entry= $path;
+  protected function createPathFile($cwd, array $paths) {
+    with ($pth= (new File($cwd, 'glue.pth'))->getOutputStream()); {
+      $base= $cwd->getURI();
+      foreach ($paths as $path) {
+        if (0 === substr_compare($base, $path, 0, strlen($base))) {
+          $entry= str_replace(DIRECTORY_SEPARATOR, '/', substr($path, strlen($base)));
+        } else {
+          $entry= $path;
+        }
+        $pth->write($entry."\n");
       }
-      $pth->write($entry."\n");
+      $pth->close();
     }
-    $pth->close();
   }
 
   /**
@@ -76,8 +76,8 @@ class Install extends Command {
    * @param  io.Folder $cwd
    * @param  string[] $installed
    */
-  protected function createLockFile($file, $cwd, array $installed) {
-    with ($lock= $file->getOutputStream()); {
+  protected function createLockFile($cwd, array $installed) {
+    with ($lock= (new File($cwd, 'glue.lock'))->getOutputStream()); {
       $lock->write("{\n");
       $s= sizeof($installed);
       $i= 0;
@@ -207,8 +207,8 @@ class Install extends Command {
 
     try {
       $installation= $this->install(new Folder($cwd, 'vendor'), $project->dependencies(), $this->status());
-      $this->createPathFile(new File($cwd, 'glue.pth'), $cwd, $installation['paths']);
-      $this->createLockFile(new File($cwd, 'glue.lock'), $cwd, $installation['installed']);
+      $this->createPathFile($cwd, $installation['paths']);
+      $this->createLockFile($cwd, $installation['installed']);
 
       $result= function() use($project, $installation) {
         Console::writeLinef(
