@@ -5,7 +5,7 @@ use xp\glue\Dependency;
 use xp\glue\Project;
 use xp\glue\Progress;
 use xp\glue\src\Source;
-use util\cmd\Console;
+use io\streams\StringWriter;
 
 /**
  * Installation status which prints out to the console 
@@ -15,6 +15,16 @@ class InstallationStatus extends \lang\Object implements Status {
 
   protected $offset;
   protected $progress;
+  protected $out;
+
+  /**
+   * Creates a new installation status instance, writing to $out
+   *
+   * @param  io.streams.StringWriter $out
+   */
+  public function __construct(StringWriter $out) {
+    $this->out= $out;
+  }
 
   public function enter(Dependency $dependency) {
     $l= sprintf(
@@ -24,12 +34,12 @@ class InstallationStatus extends \lang\Object implements Status {
       $dependency->required()->spec()
     );
     $this->offset= strlen($l);
-    Console::write($l);
+    $this->out->write($l);
   }
 
   public function found(Dependency $dependency, Source $source, Project $project) {
     $name= $source->compoundName();
-    Console::writef(
+    $this->out->writef(
       ": %s %s%s[\033[44;1;37m200\033[0m ",
       $name,
       $project->version(),
@@ -47,11 +57,11 @@ class InstallationStatus extends \lang\Object implements Status {
 
   public function stop(Dependency $dependency) {
     $this->progress->update(100);
-    Console::writeLine();
+    $this->out->writeLine();
   }
 
   public function error(Dependency $dependency, $code) {
-    Console::writeLinef(
+    $this->out->writeLinef(
       "%s[\033[41;1;37m%s\033[0m ",
       $code,
       str_repeat("\x08", $this->offset)
@@ -60,7 +70,7 @@ class InstallationStatus extends \lang\Object implements Status {
 
   public function conflicts($parent, array $conflicts) {
     foreach ($conflicts as $conflict) {
-      Console::writeLinef(
+      $this->out->writeLinef(
         '`- Conflict: %s requires %s @ %s, but %s in use by %s',
         $parent,
         $conflict['module'],

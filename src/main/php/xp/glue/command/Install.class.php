@@ -25,7 +25,8 @@ class Install extends Command {
    * @return [:var] Installation result
    */
   protected function install(Folder $libs, $dependencies) {
-    return (new Installation($this->sources, $dependencies))->run($libs, new InstallationStatus());
+    $installation= new Installation($this->sources, $dependencies);
+    return $installation->run($libs, new InstallationStatus(Console::$out));
   }
 
   /**
