@@ -8,7 +8,6 @@ use webservices\json\JsonFactory;
 use lang\reflect\Package;
 use xp\glue\input\GlueFile;
 use xp\glue\src\Source;
-use xp\glue\Progress;
 use xp\glue\Project;
 use xp\glue\Dependency;
 use xp\glue\version\Requirement;
@@ -112,63 +111,6 @@ class Install extends Command {
     return $exit;
   }
 
-  /** @return xp.glue.install.Status */
-  protected function status() {
-    return newinstance('xp.glue.install.Status', [], [
-      'PW'        => 16,
-      'offset'    => null,
-      'progress'  => null,
-      'enter'     => function(Dependency $dependency) {
-        $l= sprintf(
-          '[>>> %s] %s @ %s',
-          str_repeat('.', $this->PW),
-          $dependency->module(),
-          $dependency->required()->spec()
-        );
-        $this->offset= strlen($l);
-        Console::write($l);
-      },
-      'found'     => function(Dependency $dependency, Source $source, Project $project) {
-        $name= $source->compoundName();
-        Console::writef(
-          ": %s %s%s[\033[44;1;37m200\033[0m ",
-          $name,
-          $project->version(),
-          str_repeat("\x08", $this->offset + strlen($name) + 1 + strlen($project->version())+ 2)
-        );
-      },
-      'start'     => function(Dependency $dependency) {
-        $this->progress= new Progress($this->PW, '#');
-      },
-      'update'    => function(Dependency $dependency, $percent) {
-        $this->progress->update($percent);
-      },
-      'stop'      => function(Dependency $dependency) {
-        $this->progress->update(100);
-        Console::writeLine();
-      },
-      'error'     => function(Dependency $dependency, $code) {
-        Console::writeLinef(
-          "%s[\033[41;1;37m%s\033[0m ",
-          $code,
-          str_repeat("\x08", $this->offset)
-        );
-      },
-      'conflicts' => function($parent, array $conflicts) {
-        foreach ($conflicts as $conflict) {
-          Console::writeLinef(
-            '`- Conflict: %s requires %s @ %s, but %s in use by %s',
-            $parent,
-            $conflict['module'],
-            $conflict['required'],
-            $conflict['used'],
-            $conflict['by'] ?: 'project'
-          );
-        }
-      }
-    ]);
-  }
-
   /**
    * Gets the project in the given folder
    *
@@ -206,7 +148,7 @@ class Install extends Command {
     // Console::writeLine($project);
 
     try {
-      $installation= $this->install(new Folder($cwd, 'vendor'), $project->dependencies(), $this->status());
+      $installation= $this->install(new Folder($cwd, 'vendor'), $project->dependencies(), new InstallationStatus());
       $this->createPathFile($cwd, $installation['paths']);
       $this->createLockFile($cwd, $installation['installed']);
 
