@@ -147,6 +147,6 @@ class Installation extends \lang\Object {
     foreach ($this->dependencies as $dependency) {
       $paths= array_merge($paths, $this->install($dependency, $target, null, $status));
     }
-    return ['paths' => $paths];
+    return ['paths' => $paths, 'installed' => $this->installed];
   }
 }

@@ -43,10 +43,7 @@ class Install extends Command {
    * @return string[]
    */
   protected function install(Folder $libs, $dependencies, $status) {
-    $installation= new Installation($this->sources, $dependencies);
-    $result= $installation->run($libs, $status);
-
-    return $result['paths'];
+    return (new Installation($this->sources, $dependencies))->run($libs, $status);
   }
 
   /**
@@ -166,13 +163,15 @@ class Install extends Command {
     $project= (new GlueFile())->parse((new File($cwd, 'glue.json'))->getInputStream());
 
     try {
-      $paths= $this->install(new Folder($cwd, 'vendor'), $project->dependencies(), $this->status());
-      $count= $this->createPathFile(new File($cwd, 'glue.pth'), $cwd, $paths);
-      $result= function() use($project, $count) {
+      $result= $this->install(new Folder($cwd, 'vendor'), $project->dependencies(), $this->status());
+      $this->createPathFile(new File($cwd, 'glue.pth'), $cwd, $result['paths']);
+
+      $result= function() use($project, $result) {
         Console::writeLinef(
-          "\033[42;1;37mOK, %d dependencies processed, %d paths registered\033[0m",
+          "\033[42;1;37mOK, %d dependencies processed, %d modules installed, %d paths registered\033[0m",
           sizeof($project->dependencies()),
-          $count
+          sizeof($result['installed']),
+          sizeof($result['paths'])
         );
       };
     } catch (\lang\Throwable $t) {

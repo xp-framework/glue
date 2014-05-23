@@ -27,7 +27,7 @@ class InstallationTest extends \unittest\TestCase {
   #[@test]
   public function run_empty_installation() {
     $r= new Installation([], []);
-    $this->assertEquals(['paths' => []], $r->run($this->temp));
+    $this->assertEquals(['paths' => [], 'installed' => []], $r->run($this->temp));
   }
 
   #[@test]
@@ -41,7 +41,15 @@ class InstallationTest extends \unittest\TestCase {
     ]);
 
     $r= new Installation([$source], [new Dependency('test', 'test', $this->spec->parse('1.*'))]);
-    $this->assertEquals(['paths' => [$local->getURI()]], $r->run($this->temp));
+    $this->assertEquals(
+      [
+        'paths'     => [$local->getURI()],
+        'installed' => [
+          'test/test' => ['by' => null, 'version' => '1.0.0']
+        ]
+      ],
+      $r->run($this->temp)
+    );
   }
 
   #[@test]
@@ -58,7 +66,15 @@ class InstallationTest extends \unittest\TestCase {
       new Dependency('test', 'test', $this->spec->parse('1.*')),
       new Dependency('test', 'test', $this->spec->parse('1.*'))
     ]);
-    $this->assertEquals(['paths' => [$local->getURI()]], $r->run($this->temp));
+    $this->assertEquals(
+      [
+        'paths'     => [$local->getURI()],
+        'installed' => [
+          'test/test' => ['by' => null, 'version' => '1.0.0']
+        ]
+      ],
+      $r->run($this->temp)
+    );
   }
 
   #[@test]
@@ -77,10 +93,16 @@ class InstallationTest extends \unittest\TestCase {
 
     $r= new Installation([$source], [new Dependency('test', 'test', $this->spec->parse('1.*'))]);
     $this->assertEquals(
-      ['paths' => [
-        (new Folder($local, 'test'))->getURI(),
-        (new Folder($local, 'transitive'))->getURI()
-      ]],
+      [
+        'paths'     => [
+          (new Folder($local, 'test'))->getURI(),
+          (new Folder($local, 'transitive'))->getURI()
+        ],
+        'installed' => [
+          'test/test'       => ['by' => null, 'version' => '1.0.0'],
+          'test/transitive' => ['by' => 'test/test', 'version' => '2.0.8'],
+        ]
+      ],
       $r->run($this->temp)
     );
   }
@@ -105,11 +127,18 @@ class InstallationTest extends \unittest\TestCase {
 
     $r= new Installation([$source], [new Dependency('test', 'test', $this->spec->parse('1.*'))]);
     $this->assertEquals(
-      ['paths' => [
-        (new Folder($local, 'test'))->getURI(),
-        (new Folder($local, 'transitive'))->getURI(),
-        (new Folder($local, 'recursion'))->getURI()
-      ]],
+      [
+        'paths'     => [
+          (new Folder($local, 'test'))->getURI(),
+          (new Folder($local, 'transitive'))->getURI(),
+          (new Folder($local, 'recursion'))->getURI()
+        ],
+        'installed' => [
+          'test/test'       => ['by' => null, 'version' => '1.0.0'],
+          'test/transitive' => ['by' => 'test/test', 'version' => '2.0.8'],
+          'test/recursion'  => ['by' => 'test/transitive', 'version' => '6.6.6'],
+        ]
+      ],
       $r->run($this->temp)
     );
   }
