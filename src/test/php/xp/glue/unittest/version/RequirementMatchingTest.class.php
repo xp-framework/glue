@@ -1,6 +1,7 @@
 <?php namespace xp\glue\unittest\version;
 
 use xp\glue\version\GlueSpec;
+use xp\glue\version\Requirement;
 
 /**
  * Tests the Requirement::matches() method
@@ -22,7 +23,7 @@ class RequirementMatchingTest extends \unittest\TestCase {
 
   #[@test]
   public function exact_version_matched_by() {
-    $this->assertTrue($this->newRequirement('1.2.0')->matches('1.2.0'));
+    $this->assertTrue(Requirement::equal('1.2.0')->matches('1.2.0'));
   }
 
   #[@test]
@@ -32,12 +33,12 @@ class RequirementMatchingTest extends \unittest\TestCase {
 
   #[@test, @values(['1.2', '1.2.1', '0.2.0'])]
   public function exact_version_not_matched_by($version) {
-    $this->assertFalse($this->newRequirement('1.2.0')->matches($version));
+    $this->assertFalse(Requirement::equal('1.2.0')->matches($version));
   }
 
   #[@test]
   public function exclude_version_not_matched_by() {
-    $this->assertFalse($this->newRequirement('!=1.2.0')->matches('1.2.0'));
+    $this->assertFalse(Requirement::exclude('1.2.0')->matches('1.2.0'));
   }
 
   #[@test]
@@ -47,7 +48,7 @@ class RequirementMatchingTest extends \unittest\TestCase {
 
   #[@test, @values(['1.1.99', '1.2.1'])]
   public function exclude_version_matched_by($version) {
-    $this->assertTrue($this->newRequirement('!=1.2.0')->matches($version));
+    $this->assertTrue(Requirement::exclude('1.2.0')->matches($version));
   }
 
   #[@test, @values(['1.2.0', '1.2.1', '1.2.10'])]

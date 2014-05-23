@@ -37,6 +37,15 @@ class Requirement extends \lang\Object {
     return $this->condition->matches($version);
   }
 
+  /** @return self */
+  public static function equal($version) { return new self(new Equals($version)); }
+
+  /** @return self */
+  public static function preferred($version) { return new self(new Preferred($version)); }
+
+  /** @return self */
+  public static function exclude($version) { return new self(new Exclude($version)); }
+
   /**
    * Creates a string representation
    *

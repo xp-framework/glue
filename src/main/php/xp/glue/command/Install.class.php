@@ -184,7 +184,7 @@ class Install extends Command {
       $dependencies= [];
       foreach (self::$json->decodeFrom($lock->getInputStream()) as $module => $version) {
         sscanf($module, "%[^/]/%[^\r]", $vendor, $name);
-        $dependencies[]= new Dependency($vendor, $name, new Requirement(new Equals($version)));
+        $dependencies[]= new Dependency($vendor, $name, Requirement::equal($version));
       }
       return new Project($project->vendor(), $project->name(), $project->version(), $dependencies);
     } else {

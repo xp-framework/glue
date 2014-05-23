@@ -46,4 +46,19 @@ class RequirementTest extends \unittest\TestCase {
   public function not_equals_to_other_spec() {
     $this->assertNotEquals(new Requirement(new Equals('1.1.0')), new Requirement(new Equals('1.0.0')));
   }
+
+  #[@test]
+  public function equal_factory_method() {
+    $this->assertEquals(new Requirement(new Equals('1.0.0')), Requirement::equal('1.0.0'));
+  }
+
+  #[@test]
+  public function preferred_factory_method() {
+    $this->assertEquals(new Requirement(new Preferred('1.0.0')), Requirement::preferred('1.0.0'));
+  }
+
+  #[@test]
+  public function exclude_factory_method() {
+    $this->assertEquals(new Requirement(new Exclude('1.0.0')), Requirement::exclude('1.0.0'));
+  }
 }
