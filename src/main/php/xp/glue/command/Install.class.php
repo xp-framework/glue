@@ -24,8 +24,8 @@ class Install extends Command {
    * @param  xp.glue.Dependency[] $dependencies
    * @return string[]
    */
-  protected function install(Folder $libs, $dependencies, $status) {
-    return (new Installation($this->sources, $dependencies))->run($libs, $status);
+  protected function install(Folder $libs, $dependencies) {
+    return (new Installation($this->sources, $dependencies))->run($libs, new InstallationStatus());
   }
 
   /**
@@ -129,7 +129,7 @@ class Install extends Command {
     // Console::writeLine($project);
 
     try {
-      $installation= $this->install(new Folder($cwd, 'vendor'), $project->dependencies(), new InstallationStatus());
+      $installation= $this->install(new Folder($cwd, 'vendor'), $project->dependencies());
       $this->createPathFile($cwd, $installation['paths']);
       $this->createLockFile($cwd, $installation['installed']);
 
