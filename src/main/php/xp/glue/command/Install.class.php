@@ -105,10 +105,17 @@ class Install extends Command {
 
     $lock= new File($origin, 'glue.lock');
     if ($lock->exists()) {
+      $locked= self::$json->decodeFrom($lock->getInputStream());
+
       $dependencies= [];
-      foreach (self::$json->decodeFrom($lock->getInputStream()) as $module => $version) {
-        sscanf($module, "%[^/]/%[^\r]", $vendor, $name);
-        $dependencies[]= new Dependency($vendor, $name, Requirement::equal($version));
+      foreach ($project->dependencies() as $dependency) {
+        $module= $dependency->module();
+        if (!isset($locked[$module])) {
+          $dependencies[]= $dependency;
+        } else {
+          $version= Requirement::equal($locked[$module]);
+          $dependencies[]= new Dependency($dependency->vendor(), $dependency->name(), $version);
+        }
       }
       return new Project($project->vendor(), $project->name(), $project->version(), $dependencies);
     } else {
