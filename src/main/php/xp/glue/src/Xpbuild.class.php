@@ -78,9 +78,8 @@ class Xpbuild extends Source {
     foreach ($res->data()['files'] as $info) {
       if (!strstr($info['name'], '.xar')) continue;
 
-      $file= (new HttpConnection($base->setPath($info['link'])))->get();
       $tasks[]= new Download(
-        $file->getInputStream(),
+        new HttpConnection($base->setPath($info['link'])),
         $info['name'],
         $info['size'],
         $info['sha1']

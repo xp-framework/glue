@@ -122,9 +122,8 @@ class Artifactory extends Source {
         $pom= (new HttpConnection($uri))->get();
         $project= (new MavenPOM())->parse($pom->getInputStream());
       } else if (strstr($result['path'], '.xar')) {
-        $file= (new HttpConnection($uri))->get();
         $tasks[]= new Download(
-          $file->getInputStream(),
+          new HttpConnection($uri),
           basename($result['path']),
           $result['size'],
           $result['checksums']['sha1']
