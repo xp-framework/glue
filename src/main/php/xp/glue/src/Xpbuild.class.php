@@ -79,7 +79,7 @@ class Xpbuild extends Source {
       if (!strstr($info['name'], '.xar')) continue;
 
       $tasks[]= new Download(
-        new HttpConnection($base->setPath($info['link'])),
+        new HttpConnection(clone $base->setPath($info['link'])),
         $info['name'],
         $info['size'],
         $info['sha1']
