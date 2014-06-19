@@ -64,6 +64,8 @@ class Upgrade extends Command {
       $s= sizeof($installed);
       $i= 0;
       foreach ($installed as $module => $def) {
+        if (!isset($def['version'])) continue;
+
         $lock->write('  "'.$module.'": "'.$def['version'].'"');
         if (++$i < $s) $lock->write(",\n");
       }
