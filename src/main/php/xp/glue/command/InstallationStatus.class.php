@@ -63,8 +63,8 @@ class InstallationStatus extends \lang\Object implements Status {
   public function error(Dependency $dependency, $code) {
     $this->out->writeLinef(
       "%s[\033[41;1;37m%s\033[0m ",
-      $code,
-      str_repeat("\x08", $this->offset)
+      str_repeat("\x08", $this->offset),
+      $code
     );
   }
 
