@@ -108,13 +108,12 @@ class Install extends Command {
       $locked= self::$json->decodeFrom($lock->getInputStream());
 
       $dependencies= [];
-      foreach ($project->dependencies() as $dependency) {
-        $module= $dependency->module();
-        if (!isset($locked[$module])) {
-          $dependencies[]= $dependency;
+      foreach ($project->dependencies() as $dep) {
+        $module= $dep->module();
+        if (isset($locked[$module])) {
+          $dependencies[]= new Dependency($dep->vendor(), $dep->name(), Requirement::equal($locked[$module]));
         } else {
-          $version= Requirement::equal($locked[$module]);
-          $dependencies[]= new Dependency($dependency->vendor(), $dependency->name(), $version);
+          $dependencies[]= $dep;
         }
       }
       return new Project($project->vendor(), $project->name(), $project->version(), $dependencies);
