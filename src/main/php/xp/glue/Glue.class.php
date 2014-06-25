@@ -37,7 +37,7 @@ class Glue extends \lang\Object {
   public static function main(array $args) {
     $parsed= self::parse($args);
     try {
-      $command= Package::forName('xp.glue.command')->loadClass($parsed['method'])->newInstance();
+      $command= Package::forName('xp.glue.command')->loadClass($parsed['method'].'Command')->newInstance();
       $command->configure(new Properties($parsed['config']));
       $command->execute($parsed['args']);
       return 0;

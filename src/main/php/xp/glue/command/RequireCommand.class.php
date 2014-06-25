@@ -3,9 +3,8 @@
 use io\File;
 use io\Folder;
 use util\cmd\Console;
-use xp\glue\input\GlueFile;
+use xp\glue\version\GlueSpec;
 use xp\glue\src\Source;
-use xp\glue\Project;
 use xp\glue\Dependency;
 use xp\glue\version\Requirement;
 use xp\glue\version\Equals;
@@ -13,9 +12,9 @@ use xp\glue\install\Installation;
 use util\profiling\Timer;
 
 /**
- * Install: Resolves dependencies, downloading and linking as necessary.
+ * Require a dependency 
  */
-class Install extends Command {
+class RequireCommand extends Command {
 
   /**
    * Install dependencies and returns URIs ready for adding to class path.
@@ -103,24 +102,11 @@ class Install extends Command {
    * @throws io.FileNotFoundException if no project can be found
    */
   protected function projectIn($origin) {
-    $project= (new GlueFile())->parse((new File($origin, 'glue.json'))->getInputStream());
-
-    $lock= new File($origin, 'glue.lock');
-    if ($lock->exists()) {
-      $locked= self::$json->decodeFrom($lock->getInputStream());
-
-      $dependencies= [];
-      foreach ($project->dependencies() as $dep) {
-        $module= $dep->module();
-        if (isset($locked[$module])) {
-          $dependencies[]= new Dependency($dep->vendor(), $dep->name(), Requirement::equal($locked[$module]));
-        } else {
-          $dependencies[]= $dep;
-        }
-      }
-      return new Project($project->vendor(), $project->name(), $project->version(), $dependencies);
+    $file= new File($origin, 'glue.json');
+    if ($file->exists()) {
+      return (new GlueFile())->parse($file->getInputStream());
     } else {
-      return $project;
+      return null;
     }
   }
 
@@ -134,13 +120,20 @@ class Install extends Command {
     $timer->start();
 
     $cwd= new Folder('.');
-    $project= $this->projectIn($cwd);
+    $dependencies= [];
+    $spec= new GlueSpec();
+    foreach ($args as $arg) {
+      if (3 !== sscanf('%[^/]/%[^:]:%s', $vendor, $module, $version)) {
+        Console::$err->writeLine('*** Unparseable argument "'.$arg.'"');
+        return 127;
+      }
+      $dependencies[]= new Dependency($vendor, $module, $spec->parse($version));
+    }
     // Console::writeLine($project);
 
     try {
       $installation= $this->installInto(new Folder($cwd, 'vendor'), $project->dependencies());
       $this->createPathFile($cwd, $installation['paths']);
-      $this->createLockFile($cwd, $installation['installed']);
 
       $result= function() use($project, $installation) {
         Console::writeLinef(

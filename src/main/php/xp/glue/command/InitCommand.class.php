@@ -11,7 +11,7 @@ use lang\System;
 /**
  * Init: Transforms existing projects to glue
  */
-class Init extends Command {
+class InitCommand extends Command {
 
   public function execute(array $args) {
     if (file_exists('glue.json')) {

@@ -5,7 +5,7 @@ use util\cmd\Console;
 /**
  * Shows help
  */
-class Help extends Command {
+class HelpCommand extends Command {
 
   public function execute(array $args) {
     Console::writeLine('Usage: glue <command> [args...]');

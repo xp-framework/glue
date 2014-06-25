@@ -11,12 +11,11 @@ use xp\glue\version\Requirement;
 use xp\glue\version\Equals;
 use xp\glue\install\Installation;
 use util\profiling\Timer;
-use text\regex\Pattern;
 
 /**
- * Upgrade previously installed libraries.
+ * Install: Resolves dependencies, downloading and linking as necessary.
  */
-class Upgrade extends Command {
+class InstallCommand extends Command {
 
   /**
    * Install dependencies and returns URIs ready for adding to class path.
@@ -104,7 +103,25 @@ class Upgrade extends Command {
    * @throws io.FileNotFoundException if no project can be found
    */
   protected function projectIn($origin) {
-    return (new GlueFile())->parse((new File($origin, 'glue.json'))->getInputStream());
+    $project= (new GlueFile())->parse((new File($origin, 'glue.json'))->getInputStream());
+
+    $lock= new File($origin, 'glue.lock');
+    if ($lock->exists()) {
+      $locked= self::$json->decodeFrom($lock->getInputStream());
+
+      $dependencies= [];
+      foreach ($project->dependencies() as $dep) {
+        $module= $dep->module();
+        if (isset($locked[$module])) {
+          $dependencies[]= new Dependency($dep->vendor(), $dep->name(), Requirement::equal($locked[$module]));
+        } else {
+          $dependencies[]= $dep;
+        }
+      }
+      return new Project($project->vendor(), $project->name(), $project->version(), $dependencies);
+    } else {
+      return $project;
+    }
   }
 
   /**
@@ -118,43 +135,7 @@ class Upgrade extends Command {
 
     $cwd= new Folder('.');
     $project= $this->projectIn($cwd);
-
-    $locked= self::$json->decodeFrom((new File($cwd, 'glue.lock'))->getInputStream());
-
-    // No arguments: Just update all dependencies. Otherwise only selectively,
-    // leaving all others locked.
-    if (empty($args)) {
-      $include= function($module) { return true; };
-    } else {
-      $pattern= Pattern::compile('^('.implode('|', $args).')');
-      $include= function($module) use($pattern) { return $pattern->matches($module); };
-    }
-
-    $dependencies= [];
-    foreach ($project->dependencies() as $dependency) {
-      $module= $dependency->module();
-
-      if (!isset($locked[$module])) {
-        $dependencies[]= $dependency;
-      } else if ($include($module)) {
-        $dependencies[]= $dependency;
-        Console::writeLinef(
-          'Upgrading %s from %s to %s',
-          $module,
-          $locked[$module],
-          $dependency->required()->spec()
-        );
-      } else {
-        $version= Requirement::equal($locked[$module]);
-        Console::writeLinef(
-          'Keeping %s @ %s',
-          $module,
-          $locked[$module]
-        );
-        $dependencies[]= new Dependency($dependency->vendor(), $dependency->name(), $version);
-      }
-    }
-    $project= new Project($project->vendor(), $project->name(), $project->version(), $dependencies);
+    // Console::writeLine($project);
 
     try {
       $installation= $this->installInto(new Folder($cwd, 'vendor'), $project->dependencies());
