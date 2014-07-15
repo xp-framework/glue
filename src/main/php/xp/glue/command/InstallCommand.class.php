@@ -142,7 +142,7 @@ class InstallCommand extends Command {
       $this->createPathFile($cwd, $installation['paths']);
       $this->createLockFile($cwd, $installation['installed']);
 
-      if (isset($installation['errors'])) {
+      if (!empty($installation['errors'])) {
         $result= function() use($project, $installation) {
           foreach ($installation['errors'] as $module => $cause) {
             Console::writeLinef('F %s: %s', $module, $cause->reason());
