@@ -5,6 +5,7 @@ use io\File;
 use xp\glue\input\GlueFile;
 use xp\glue\task\LinkTo;
 use xp\glue\Dependency;
+use util\Objects;
 
 /**
  * GIT checkout in the local file system
@@ -59,5 +60,10 @@ class Checkout extends Source {
       'project' => $project,
       'tasks'   => $tasks
     ];
+  }
+
+  /** @return string */
+  public function toString() {
+    return $this->getClassName().'@'.Objects::stringOf($this->bases);
   }
 }

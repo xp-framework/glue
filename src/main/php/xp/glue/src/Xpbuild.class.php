@@ -89,4 +89,10 @@ class Xpbuild extends Source {
     $project= new Project($module['vendor'], $module['module'], $release, []);
     return ['project' => $project, 'tasks' => $tasks];
   }
+
+  /** @return string */
+  public function toString() {
+    $cloned= clone $this->rest->getBase();
+    return $this->getClassName().'(->'.($cloned->setPassword('...')->getURL()).')';
+  }
 }

@@ -136,4 +136,10 @@ class Artifactory extends Source {
     }
     return ['project' => $project, 'tasks' => $tasks];
   }
+
+  /** @return string */
+  public function toString() {
+    $cloned= clone $this->rest->getBase();
+    return $this->getClassName().'(->'.($cloned->setPassword('...')->getURL()).')';
+  }
 }

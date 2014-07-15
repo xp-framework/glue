@@ -142,14 +142,30 @@ class InstallCommand extends Command {
       $this->createPathFile($cwd, $installation['paths']);
       $this->createLockFile($cwd, $installation['installed']);
 
-      $result= function() use($project, $installation) {
-        Console::writeLinef(
-          "\033[42;1;37mOK, %d dependencies processed, %d modules installed, %d paths registered\033[0m",
-          sizeof($project->dependencies()),
-          sizeof($installation['installed']),
-          sizeof($installation['paths'])
-        );
-      };
+      if (isset($installation['errors'])) {
+        $result= function() use($project, $installation) {
+          foreach ($installation['errors'] as $module => $cause) {
+            Console::writeLinef('F %s: %s', $module, $cause->reason());
+          }
+          Console::writeLine();
+          Console::writeLinef(
+            "\033[41;1;37mFAIL, %d dependencies processed, %d modules installed, %d paths registered, %d error(s) occured\033[0m",
+            sizeof($project->dependencies()),
+            sizeof($installation['installed']),
+            sizeof($installation['paths']),
+            sizeof($installation['errors'])
+          );
+        };
+      } else {
+        $result= function() use($project, $installation) {
+          Console::writeLinef(
+            "\033[42;1;37mOK, %d dependencies processed, %d modules installed, %d paths registered, 0 error(s) occured\033[0m",
+            sizeof($project->dependencies()),
+            sizeof($installation['installed']),
+            sizeof($installation['paths'])
+          );
+        };
+      }
     } catch (\lang\Throwable $t) {
       $result= function() use($t) {
         $error= explode("\n", $t->toString(), 2);

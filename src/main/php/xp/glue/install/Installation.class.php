@@ -12,6 +12,7 @@ class Installation extends \lang\Object {
   protected static $NO_STATUS;
 
   protected $installed;
+  protected $errors;
   protected $sources;
   protected $dependencies;
 
@@ -26,7 +27,6 @@ class Installation extends \lang\Object {
    * @param  xp.glue.Dependency[] $dependencies
    */
   public function __construct($sources, $dependencies) {
-    $this->installed= [];
     $this->sources= $sources;
     $this->dependencies= [];
     foreach ($dependencies as $dependency) {
@@ -97,7 +97,8 @@ class Installation extends \lang\Object {
    */
   protected function install(Dependency $dependency, Folder $target, $parent, $status) {
     $module= $dependency->module();
-    if (isset($this->installed[$module])) return [];
+    if (isset($this->errors[$module])) return [];     // Do not try again
+    if (isset($this->installed[$module])) return [];  // Paths already registered
     $status->enter($dependency);
 
     $this->installed[$module]= ['by' => $parent];
@@ -130,6 +131,8 @@ class Installation extends \lang\Object {
       ));
     }
 
+    unset($this->installed[$module]);
+    $this->errors[$module]= new NotFound($this->sources);
     $status->error($dependency, 404);
     return [];
   }
@@ -142,11 +145,13 @@ class Installation extends \lang\Object {
    * @return var The installation's result
    */
   public function run(Folder $target, Status $status= null) {
+    $this->installed= [];
+    $this->errors= [];
     $paths= [];
     $status || $status= self::$NO_STATUS;
     foreach ($this->dependencies as $dependency) {
       $paths= array_merge($paths, $this->install($dependency, $target, null, $status));
     }
-    return ['paths' => $paths, 'installed' => $this->installed];
+    return ['paths' => $paths, 'installed' => $this->installed, 'errors' => $this->errors];
   }
 }
