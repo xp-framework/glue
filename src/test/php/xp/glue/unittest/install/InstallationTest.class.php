@@ -27,7 +27,7 @@ class InstallationTest extends \unittest\TestCase {
   #[@test]
   public function run_empty_installation() {
     $r= new Installation([], []);
-    $this->assertEquals(['paths' => [], 'installed' => []], $r->run($this->temp));
+    $this->assertEquals(['paths' => [], 'installed' => [], 'errors' => []], $r->run($this->temp));
   }
 
   #[@test]
@@ -46,7 +46,8 @@ class InstallationTest extends \unittest\TestCase {
         'paths'     => [$local->getURI()],
         'installed' => [
           'test/test' => ['by' => null, 'version' => '1.0.0']
-        ]
+        ],
+        'errors'    => []
       ],
       $r->run($this->temp)
     );
@@ -71,7 +72,8 @@ class InstallationTest extends \unittest\TestCase {
         'paths'     => [$local->getURI()],
         'installed' => [
           'test/test' => ['by' => null, 'version' => '1.0.0']
-        ]
+        ],
+        'errors'    => []
       ],
       $r->run($this->temp)
     );
@@ -101,7 +103,8 @@ class InstallationTest extends \unittest\TestCase {
         'installed' => [
           'test/test'       => ['by' => null, 'version' => '1.0.0'],
           'test/transitive' => ['by' => 'test/test', 'version' => '2.0.8'],
-        ]
+        ],
+        'errors'    => []
       ],
       $r->run($this->temp)
     );
@@ -137,7 +140,8 @@ class InstallationTest extends \unittest\TestCase {
           'test/test'       => ['by' => null, 'version' => '1.0.0'],
           'test/transitive' => ['by' => 'test/test', 'version' => '2.0.8'],
           'test/recursion'  => ['by' => 'test/transitive', 'version' => '6.6.6'],
-        ]
+        ],
+        'errors'    => []
       ],
       $r->run($this->temp)
     );

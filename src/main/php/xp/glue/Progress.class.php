@@ -4,9 +4,12 @@ use util\cmd\Console;
 use io\streams\StringWriter;
 
 class Progress extends \lang\Object {
+  const STATUS_WIDTH= 5;
+
   protected $width;
   protected $char;
   protected $current;
+  protected $cursor;
   protected $out;
 
   /**
@@ -21,6 +24,14 @@ class Progress extends \lang\Object {
     $this->char= $char;
     $this->current= 0;
     $this->out= $out ?: Console::$out;
+
+    $this->out->write('[>>> ', str_repeat('.', $this->width), ']');
+    $this->cursor= $this->width + self::STATUS_WIDTH + 1;
+  }
+
+  public function status($code) {
+    $this->out->writef("%s[\033[43;1;37m%03d\033[0m ", str_repeat("\x08", $this->cursor), $code);
+    $this->cursor= self::STATUS_WIDTH;
   }
 
   /**
@@ -30,9 +41,14 @@ class Progress extends \lang\Object {
    */
   public function update($percent) {
     $chars= ceil((min(max($percent, 0), 100) / 100) * $this->width);
-    if ($chars > $this->current) {
-      $this->out->write(str_repeat($this->char, $chars - $this->current));
-      $this->current= $chars;
-    }
+
+    // TODO: Optimize
+    $this->out->write(
+      str_repeat("\x08", $this->cursor - self::STATUS_WIDTH).
+      str_repeat($this->char, $chars).
+      str_repeat('.', $this->width - $chars)
+    );
+
+    $this->cursor= $this->width + self::STATUS_WIDTH;
   }
 }

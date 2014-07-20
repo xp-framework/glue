@@ -1,22 +1,25 @@
 <?php namespace xp\glue\install;
 
 use xp\glue\src\Source;
+use xp\glue\task\Task;
 use xp\glue\Dependency;
 use xp\glue\Project;
 
 class NoInstallationStatus extends \lang\Object implements Status {
 
-  public function enter(Dependency $dep) { }
+  public function enter(Dependency $dependency) { }
 
-  public function found(Dependency $dep, Source $source, Project $project) { }
+  public function found(Dependency $dependency, Source $source, Project $project) { }
 
-  public function error(Dependency $dep, $code) { }
+  public function error(Dependency $dependency, $code) { }
 
-  public function start(Dependency $dep) { }
+  public function start(Dependency $dependency, Task $task) { }
 
-  public function update(Dependency $dep, $percent) { }
+  public function report(Dependency $dependency, Task $task, $error) { }
 
-  public function stop(Dependency $dep) { }
+  public function progress(Dependency $dependency, Task $task, $percent) { }
+
+  public function stop(Dependency $dependency, Task $task) { }
 
   public function conflicts($parent, array $conflicts) { }
 }

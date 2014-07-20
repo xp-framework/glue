@@ -2,7 +2,7 @@
 
 use util\Objects;
 
-class NotFound extends \lang\Object {
+class NotFound extends Error {
   protected $searched;
 
   public function __construct($searched) {

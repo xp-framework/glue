@@ -27,19 +27,20 @@ class LinkTo extends Task {
    *
    * @param  xp.glue.Dependency $dependency
    * @param  io.Folder $folder
-   * @param  var $progress
+   * @param  var $status
    * @return string
    */
-  public function perform(Dependency $dependency, Folder $folder, callable $progress) {
+  public function perform(Dependency $dependency, Folder $folder, $status) {
+    $status->report($dependency, $this, 302);
     return $this->folder()->getURI();
   }
 
   /**
-   * Creates a string representation
+   * Returns a status to be used in the installation's output
    *
    * @return string
    */
-  public function toString() {
-    return $this->getClassName().'<'.$this->folder->toString().'>';
+  public function status() {
+    return '->'.$this->folder->getURI();
   }
 }

@@ -109,19 +109,12 @@ class Installation extends \lang\Object {
       $this->installed[$module]['version']= $resolved['project']->version();
       $status->found($dependency, $source, $resolved['project']);
 
-      $status->start($dependency);
-      $steps= sizeof($resolved['tasks']);
       $vendor= new Folder($target, $dependency->vendor());
       foreach ($resolved['tasks'] as $i => $task) {
-        $paths[]= $task->perform(
-          $dependency,
-          $vendor,          
-          function($percent) use($dependency, $status, $i, $steps) {
-            $status->update($dependency, $percent / $steps * ($i + 1));
-          }
-        );
+        $status->start($dependency, $task);
+        $paths[]= $task->perform($dependency, $vendor, $status);
+        $status->stop($dependency, $task);
       }
-      $status->stop($dependency);
 
       return array_merge($paths, $this->register(
         $module,
@@ -133,7 +126,7 @@ class Installation extends \lang\Object {
 
     unset($this->installed[$module]);
     $this->errors[$module]= new NotFound($this->sources);
-    $status->error($dependency, 404);
+    $status->error($dependency, $this->errors[$module]);
     return [];
   }
 

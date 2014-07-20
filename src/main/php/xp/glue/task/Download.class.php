@@ -47,10 +47,10 @@ class Download extends Task {
    *
    * @param  xp.glue.Dependency $dependency
    * @param  io.Folder $folder
-   * @param  var $progress
+   * @param  var $status
    * @return string
    */
-  public function perform(Dependency $dependency, Folder $folder, callable $progress) {
+  public function perform(Dependency $dependency, Folder $folder, $status) {
     $folder->exists() || $folder->create(0755);
 
     $target= new File($folder, $this->file);
@@ -61,13 +61,16 @@ class Download extends Task {
     $response= $this->conn->request('GET', [], $headers);
 
     if (304 !== $response->statusCode()) {
+      $status->report($dependency, $this, 304);
+    } else {
+      $status->report($dependency, $this, $response->statusCode());
       with ($in= $response->getInputStream(), $out= $target->getOutputStream()); {
         $done= 0;
         while ($in->available()) {
           $chunk= $in->read();
           $done+= strlen($chunk);
           $out->write($chunk);
-          $progress($done / $this->size * 100);
+          $progress->update($done / $this->size * 100);
         }
         $in->close();
         $out->close();
@@ -77,11 +80,11 @@ class Download extends Task {
   }
 
   /**
-   * Creates a string representation
+   * Returns a status to be used in the installation's output
    *
    * @return string
    */
-  public function toString() {
-    return $this->getClassName().'<'.$this->file.' ('.$this->sha1.')>';
+  public function status() {
+    return '@//'.$this->conn->getURL()->getHost().'/.../'.$this->file;
   }
 }

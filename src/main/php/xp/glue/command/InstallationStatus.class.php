@@ -5,6 +5,7 @@ use xp\glue\Dependency;
 use xp\glue\Project;
 use xp\glue\Progress;
 use xp\glue\src\Source;
+use xp\glue\task\Task;
 use io\streams\StringWriter;
 
 /**
@@ -27,51 +28,42 @@ class InstallationStatus extends \lang\Object implements Status {
   }
 
   public function enter(Dependency $dependency) {
-    $l= sprintf(
-      '[>>> %s] %s @ %s',
-      str_repeat('.', self::PW),
-      $dependency->module(),
-      $dependency->required()->spec()
-    );
-    $this->offset= strlen($l);
-    $this->out->write($l);
+    $this->out->writef('- %s @ %s: ', $dependency->module(), $dependency->required()->spec());
   }
 
   public function found(Dependency $dependency, Source $source, Project $project) {
-    $name= $source->compoundName();
-    $this->out->writef(
-      ": %s %s%s[\033[44;1;37m200\033[0m ",
-      $name,
-      $project->version(),
-      str_repeat("\x08", $this->offset + strlen($name) + 1 + strlen($project->version())+ 2)
-    );
+    $this->out->writeLinef('%s %s', $source->compoundName(), $project->version());
   }
 
-  public function start(Dependency $dependency) {
+  public function start(Dependency $dependency, Task $task) {
+    $str= $task->status();
+    $w= self::PW + 6;
+    $this->out->writef('  %s %s%s', str_repeat(' ', $w), $str, str_repeat("\x08", strlen($str) + $w + 1));
     $this->progress= new Progress(self::PW, '#');
+    $this->progress->update(0);
   }
 
-  public function update(Dependency $dependency, $percent) {
+  public function report(Dependency $dependency, Task $task, $code) {
+    $this->progress->status($code);
+  }
+
+  public function progress(Dependency $dependency, Task $task, $percent) {
     $this->progress->update($percent);
   }
 
-  public function stop(Dependency $dependency) {
+  public function stop(Dependency $dependency, Task $task) {
     $this->progress->update(100);
     $this->out->writeLine();
   }
 
-  public function error(Dependency $dependency, $code) {
-    $this->out->writeLinef(
-      "%s[\033[41;1;37m%s\033[0m ",
-      str_repeat("\x08", $this->offset),
-      $code
-    );
+  public function error(Dependency $dependency, $error) {
+    $this->out->writeLine(str_replace("\n", "\n  ", $error->reason()));
   }
 
   public function conflicts($parent, array $conflicts) {
     foreach ($conflicts as $conflict) {
       $this->out->writeLinef(
-        '`- Conflict: %s requires %s @ %s, but %s in use by %s',
+        '  Conflict: %s requires %s @ %s, but %s in use by %s',
         $parent,
         $conflict['module'],
         $conflict['required'],

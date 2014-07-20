@@ -16,8 +16,24 @@ abstract class Task extends \lang\Object {
    *
    * @param  xp.glue.Dependency $dependency
    * @param  io.Folder $folder
-   * @param  var $progress
+   * @param  var $status
    * @return string
    */
-  abstract public function perform(Dependency $dependency, Folder $folder, callable $progress);
+  abstract public function perform(Dependency $dependency, Folder $folder, $status);
+
+  /**
+   * Returns a status to be used in the installation's output
+   *
+   * @return string
+   */
+  abstract public function status();
+
+  /**
+   * Creates a string representation
+   *
+   * @return string
+   */
+  public function toString() {
+    return $this->getClassName().'('.$this->status().')';
+  }
 }
