@@ -12,7 +12,7 @@ use io\streams\StringWriter;
  * Installation status which prints out to the console 
  */
 class InstallationStatus extends \lang\Object implements Status {
-  const PW = 16;
+  const PW = 10;
 
   protected $offset;
   protected $progress;
@@ -28,7 +28,7 @@ class InstallationStatus extends \lang\Object implements Status {
   }
 
   public function enter(Dependency $dependency) {
-    $this->out->writef('- %s @ %s: ', $dependency->module(), $dependency->required()->spec());
+    $this->out->writef('%s @ %s: ', $dependency->module(), $dependency->required()->spec());
   }
 
   public function found(Dependency $dependency, Source $source, Project $project) {
@@ -38,7 +38,7 @@ class InstallationStatus extends \lang\Object implements Status {
   public function start(Dependency $dependency, Task $task) {
     $str= $task->status();
     $w= self::PW + 6;
-    $this->out->writef('  %s %s%s', str_repeat(' ', $w), $str, str_repeat("\x08", strlen($str) + $w + 1));
+    $this->out->writef('%s %s%s', str_repeat(' ', $w), $str, str_repeat("\x08", strlen($str) + $w + 1));
     $this->progress= new Progress(self::PW, '#');
     $this->progress->update(0);
   }
@@ -63,7 +63,7 @@ class InstallationStatus extends \lang\Object implements Status {
   public function conflicts($parent, array $conflicts) {
     foreach ($conflicts as $conflict) {
       $this->out->writeLinef(
-        '  Conflict: %s requires %s @ %s, but %s in use by %s',
+        'Conflict: %s requires %s @ %s, but %s in use by %s',
         $parent,
         $conflict['module'],
         $conflict['required'],
