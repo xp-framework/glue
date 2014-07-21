@@ -144,10 +144,6 @@ class InstallCommand extends Command {
 
       if (!empty($installation['errors'])) {
         $result= function() use($project, $installation) {
-          foreach ($installation['errors'] as $module => $cause) {
-            Console::writeLinef('F %s: %s', $module, $cause->reason());
-          }
-          Console::writeLine();
           Console::writeLinef(
             "\033[41;1;37mFAIL, %d dependencies processed, %d modules installed, %d paths registered, %d error(s) occured\033[0m",
             sizeof($project->dependencies()),
