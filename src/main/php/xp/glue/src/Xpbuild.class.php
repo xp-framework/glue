@@ -52,12 +52,12 @@ class Xpbuild extends Source {
    * Searches for a given term
    *
    * @param  string $term
-   * @return util.data.Sequence<xp.glue.Project>
+   * @return util.data.Sequence<string>
    */
   public function find($term) {
     $res= $this->rest->execute((new RestRequest('/search'))->withParameter('q', $term));
     return Sequence::of($res->data())
-      ->map(function($data) { return new Project($data['vendor'], $data['module'], '*', []); })
+      ->map(function($data) { return $data['vendor'].'/'.$data['module']; })
     ;
   }
 

@@ -37,7 +37,7 @@ class Checkout extends Source {
    * Searches for a given term
    *
    * @param  string $term
-   * @return util.data.Sequence<xp.glue.Project>
+   * @return util.data.Sequence<string>
    */
   public function find($term) {
     $glue= new GlueFile();
@@ -50,6 +50,7 @@ class Checkout extends Source {
       ->filter(function($file) { return $file->exists(); })
       ->map(function($file) use($glue) { return $glue->parse($file->getInputStream()); })
       ->filter(function($project) use($pattern) { return $pattern->matches($project->vendor().'/'.$project->name()); })
+      ->map(function($project) { return $project->vendor().'/'.$project->name(); })
     ;
   }
 

@@ -21,14 +21,7 @@ class SearchCommand extends Command {
       ->flatten(function($source) use($term) { return $source->find($term); })
       ->distinct()
       ->counting($found)
-      ->each(function($project) {
-        Console::writeLinef(
-          '* %s/%s@%s',
-          $project->vendor(),
-          $project->name(),
-          $project->version()
-        );
-      })
+      ->each(function($module) { Console::writeLinef($module); })
     ;
 
     Console::writeLine();

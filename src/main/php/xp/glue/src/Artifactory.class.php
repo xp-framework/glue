@@ -80,7 +80,7 @@ class Artifactory extends Source {
    * Searches for a given term
    *
    * @param  string $term
-   * @return util.data.Sequence<xp.glue.Project>
+   * @return util.data.Sequence<string>
    */
   public function find($term) {
     return Sequence::$EMPTY;      // TBI
