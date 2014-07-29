@@ -60,7 +60,7 @@ class Download extends Task {
     }
     $response= $this->conn->request('GET', [], $headers);
 
-    if (304 !== $response->statusCode()) {
+    if (304 === $response->statusCode()) {
       $status->report($dependency, $this, 304);
     } else {
       $status->report($dependency, $this, $response->statusCode());
@@ -70,7 +70,7 @@ class Download extends Task {
           $chunk= $in->read();
           $done+= strlen($chunk);
           $out->write($chunk);
-          $progress->update($done / $this->size * 100);
+          $status->progress($dependency, $this, $done / $this->size * 100);
         }
         $in->close();
         $out->close();
