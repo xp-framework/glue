@@ -2,8 +2,6 @@
 
 use util\Objects;
 use util\cmd\Console;
-use xp\glue\Dependency;
-use xp\glue\version\GlueSpec;
 
 /**
  * Search: Searches for a given package
@@ -11,13 +9,14 @@ use xp\glue\version\GlueSpec;
 class SearchCommand extends Command {
 
   /**
-   * Locate a dependency
+   * Execute this action
    *
-   * @param  string $term
-   * @return void
+   * @param  string[] $args
    */
-  protected function search($term) {
+  public function execute(array $args) {
+    $term= implode(' ', $args);
     $found= 0;
+
     foreach ($this->sources as $source) {
       foreach ($source->find($term)->counting($found) as $project) {
         Console::writeLinef(
@@ -36,18 +35,5 @@ class SearchCommand extends Command {
     } else {
       Console::writeLine('Nothing found for search term "', $term, '"');
     }
-  }
-
-  /**
-   * Execute this action
-   *
-   * @param  string[] $args
-   */
-  public function execute(array $args) {
-    $spec= new GlueSpec();
-    foreach ($args as $arg) {
-      $this->search($arg);
-    }
-    return 0;
   }
 }
