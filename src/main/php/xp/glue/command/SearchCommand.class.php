@@ -1,7 +1,7 @@
 <?php namespace xp\glue\command;
 
-use util\Objects;
 use util\cmd\Console;
+use util\data\Sequence;
 
 /**
  * Search: Searches for a given package
@@ -17,17 +17,19 @@ class SearchCommand extends Command {
     $term= implode(' ', $args);
     $found= 0;
 
-    foreach ($this->sources as $source) {
-      foreach ($source->find($term)->counting($found) as $project) {
+    Sequence::of($this->sources)
+      ->flatten(function($source) use($term) { return $source->find($term); })
+      ->distinct()
+      ->counting($found)
+      ->each(function($project) {
         Console::writeLinef(
-          '* %s/%s@%s @ %s',
+          '* %s/%s@%s',
           $project->vendor(),
           $project->name(),
-          $project->version(),
-          str_replace("\n", "\n  ", Objects::stringOf($source))
+          $project->version()
         );
-      }
-    }
+      })
+    ;
 
     Console::writeLine();
     if ($found > 0) {
