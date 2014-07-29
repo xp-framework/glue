@@ -4,20 +4,11 @@ use util\Objects;
 use util\cmd\Console;
 use xp\glue\Dependency;
 use xp\glue\version\GlueSpec;
-use xp\glue\version\Requirement;
 
 /**
  * Search: Searches for a given package
  */
 class SearchCommand extends Command {
-  protected static $ANY_VERSION;
-
-  static function __static() {
-    self::$ANY_VERSION= new Requirement(newinstance('xp.glue.version.Condition', [], '{
-      public function matches($input) { return true; }
-      public function spec() { return "*"; }
-    }'));
-  }
 
   /**
    * Locate a dependency
