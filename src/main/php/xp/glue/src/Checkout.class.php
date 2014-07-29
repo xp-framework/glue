@@ -41,7 +41,7 @@ class Checkout extends Source {
    */
   public function find($term) {
     $glue= new GlueFile();
-    $pattern= Pattern::compile($term);
+    $pattern= Pattern::compile($term, Pattern::CASE_INSENSITIVE);
     return Sequence::of($this->bases)
       ->distinct()
       ->map(function($folder) { return new IOCollectionIterator(new FileCollection($folder)); })
