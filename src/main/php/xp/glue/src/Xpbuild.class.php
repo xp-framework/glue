@@ -74,12 +74,12 @@ class Xpbuild extends Source {
       ->withSegment('module', $module['module'])
       ->withSegment('release', $release)
     );
-    $base= $this->rest->getBase();
+    $base= clone $this->rest->getBase();
     foreach ($res->data()['files'] as $info) {
       if (!strstr($info['name'], '.xar')) continue;
 
       $tasks[]= new Download(
-        new HttpConnection(clone $base->setPath($info['link'])),
+        new HttpConnection($base->setPath($info['link'])),
         $info['name'],
         $info['size'],
         $info['sha1']
