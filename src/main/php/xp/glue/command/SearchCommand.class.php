@@ -22,23 +22,23 @@ class SearchCommand extends Command {
   /**
    * Locate a dependency
    *
-   * @param  xp.glue.Dependency $dependency 
+   * @param  string $term
    * @return void
    */
-  protected function locate($dependency) {
+  protected function search($term) {
     $found= false;
     foreach ($this->sources as $source) {
-      if (null === ($resolved= $source->fetch($dependency))) continue;
-
-      if (!$found) {
-        Console::writeLine($dependency, ' found');
-        $found= true;
+      if (!($results= $source->find($term))) continue;
+      foreach ($results as $project) {
+        Console::writeLinef(
+          '* %s/%s@%s @ %s',
+          $project->vendor(),
+          $project->name(),
+          $project->version(),
+          str_replace("\n", "\n  ", Objects::stringOf($source))
+        );
       }
-      Console::writeLinef(
-        '- %s @ %s',
-        $resolved['project']->version(),
-        str_replace("\n", "\n  ", Objects::stringOf($source))
-      );
+      $found= true;
     }
 
     if (!$found) {
@@ -54,17 +54,7 @@ class SearchCommand extends Command {
   public function execute(array $args) {
     $spec= new GlueSpec();
     foreach ($args as $arg) {
-      $version= null;
-      if (sscanf($arg, '%[^/]/%[^@]@%s', $vendor, $module, $version) < 2) {
-        Console::$err->writeLine('*** Unparseable argument "'.$arg.'"');
-        return 127;
-      }
-
-      $this->locate(new Dependency(
-        $vendor,
-        $module,
-        $version ? $spec->parse($version) : self::$ANY_VERSION
-      ));
+      $this->search(\text\regex\Pattern::compile($arg));
     }
     return 0;
   }

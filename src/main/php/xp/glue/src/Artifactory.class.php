@@ -8,6 +8,7 @@ use xp\glue\Dependency;
 use xp\glue\task\Download;
 use xp\glue\input\MavenPOM;
 use text\regex\Pattern;
+use text\regex\Matcher;
 
 /**
  * Artifactory source
@@ -73,6 +74,10 @@ class Artifactory extends Source {
 
     ksort($selected);
     return array_pop($selected);
+  }
+
+  public function find(Matcher $term) {
+    return []; // TBI
   }
 
   /**

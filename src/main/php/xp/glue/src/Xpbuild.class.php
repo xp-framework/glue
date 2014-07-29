@@ -8,6 +8,7 @@ use xp\glue\task\Download;
 use xp\glue\version\Requirement;
 use xp\glue\Project;
 use xp\glue\Dependency;
+use text\regex\Matcher;
 
 /**
  * XP Build System source
@@ -45,6 +46,10 @@ class Xpbuild extends Source {
       if ($requirement->matches($version)) return $version;
     }
     return null;
+  }
+
+  public function find(Matcher $term) {
+    return []; // TBI
   }
 
   /**
