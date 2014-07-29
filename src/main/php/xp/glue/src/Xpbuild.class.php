@@ -8,7 +8,7 @@ use xp\glue\task\Download;
 use xp\glue\version\Requirement;
 use xp\glue\Project;
 use xp\glue\Dependency;
-use text\regex\Matcher;
+use util\data\Sequence;
 
 /**
  * XP Build System source
@@ -48,8 +48,17 @@ class Xpbuild extends Source {
     return null;
   }
 
-  public function find(Matcher $term) {
-    return []; // TBI
+  /**
+   * Searches for a given term
+   *
+   * @param  string $term
+   * @return util.data.Sequence<xp.glue.Project>
+   */
+  public function find($term) {
+    $res= $this->rest->execute((new RestRequest('/search'))->withParameter('q', $term));
+    return Sequence::of($res->data())
+      ->map(function($data) { return new Project($data['vendor'], $data['module'], '*', []); })
+    ;
   }
 
   /**

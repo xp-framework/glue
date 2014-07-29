@@ -54,7 +54,7 @@ class SearchCommand extends Command {
   public function execute(array $args) {
     $spec= new GlueSpec();
     foreach ($args as $arg) {
-      $this->search(\text\regex\Pattern::compile($arg));
+      $this->search($arg);
     }
     return 0;
   }

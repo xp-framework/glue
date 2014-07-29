@@ -76,7 +76,13 @@ class Artifactory extends Source {
     return array_pop($selected);
   }
 
-  public function find(Matcher $term) {
+  /**
+   * Searches for a given term
+   *
+   * @param  string $term
+   * @return util.data.Sequence<xp.glue.Project>
+   */
+  public function find($term) {
     return []; // TBI
   }
 
