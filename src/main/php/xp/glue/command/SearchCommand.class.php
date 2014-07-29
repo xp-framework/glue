@@ -26,24 +26,23 @@ class SearchCommand extends Command {
    * @return void
    */
   protected function locate($dependency) {
-    $found= create('new util.collections.HashTable<xp.glue.src.Source, var>');
+    $found= false;
     foreach ($this->sources as $source) {
-      if (null !== ($resolved= $source->fetch($dependency))) {
-        $found[$source]= $resolved;
+      if (null === ($resolved= $source->fetch($dependency))) continue;
+
+      if (!$found) {
+        Console::writeLine($dependency, ' found');
+        $found= true;
       }
+      Console::writeLinef(
+        '- %s @ %s',
+        $resolved['project']->version(),
+        str_replace("\n", "\n  ", Objects::stringOf($source))
+      );
     }
 
-    if ($found->isEmpty()) {
+    if (!$found) {
       Console::writeLine($dependency, ' not found');
-    } else {
-      Console::writeLine($dependency, ' found');
-      foreach ($found as $pair) {
-        Console::writeLinef(
-          '- %s @ %s',
-          $pair->value['project']->version(),
-          str_replace("\n", "\n  ", Objects::stringOf($pair->key))
-        );
-      }
     }
   }
 
