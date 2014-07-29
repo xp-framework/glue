@@ -15,12 +15,10 @@ class SearchCommand extends Command {
    */
   public function execute(array $args) {
     $term= implode(' ', $args);
-    $found= 0;
 
-    Sequence::of($this->sources)
+    $found= Sequence::of($this->sources)
       ->flatten(function($source) use($term) { return $source->find($term); })
       ->distinct()
-      ->counting($found)
       ->each(function($module) { Console::writeLinef($module); })
     ;
 
