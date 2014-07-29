@@ -8,7 +8,7 @@ use xp\glue\Dependency;
 use xp\glue\task\Download;
 use xp\glue\input\MavenPOM;
 use text\regex\Pattern;
-use text\regex\Matcher;
+use util\data\Sequence;
 
 /**
  * Artifactory source
@@ -83,7 +83,7 @@ class Artifactory extends Source {
    * @return util.data.Sequence<xp.glue.Project>
    */
   public function find($term) {
-    return []; // TBI
+    return Sequence::$EMPTY;      // TBI
   }
 
   /**

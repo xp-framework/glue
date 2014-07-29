@@ -26,10 +26,9 @@ class SearchCommand extends Command {
    * @return void
    */
   protected function search($term) {
-    $found= false;
+    $found= 0;
     foreach ($this->sources as $source) {
-      if (!($results= $source->find($term))) continue;
-      foreach ($results as $project) {
+      foreach ($source->find($term)->counting($found) as $project) {
         Console::writeLinef(
           '* %s/%s@%s @ %s',
           $project->vendor(),
@@ -38,11 +37,13 @@ class SearchCommand extends Command {
           str_replace("\n", "\n  ", Objects::stringOf($source))
         );
       }
-      $found= true;
     }
 
-    if (!$found) {
-      Console::writeLine($dependency, ' not found');
+    Console::writeLine();
+    if ($found > 0) {
+      Console::writeLine($found, ' result(s) for "', $term, '"');
+    } else {
+      Console::writeLine('Nothing found for search term "', $term, '"');
     }
   }
 
