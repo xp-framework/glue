@@ -19,7 +19,7 @@ class SearchCommand extends Command {
     $found= Sequence::of($this->sources)
       ->flatten(function($source) use($term) { return $source->find($term); })
       ->distinct()
-      ->each(function($module) { Console::writeLinef($module); })
+      ->each(function($module) { Console::writeLine($module); })
     ;
 
     Console::writeLine();
