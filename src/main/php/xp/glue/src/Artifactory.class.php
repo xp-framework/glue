@@ -83,7 +83,24 @@ class Artifactory extends Source {
    * @return util.data.Sequence<string>
    */
   public function find($term) {
-    return Sequence::$EMPTY;      // TBI
+    $search= (new RestRequest('/api/search/artifact'))
+      ->withParameter('name', $term)
+      ->withHeader('X-Result-Detail', 'info')
+      ->withAccept('application/vnd.org.jfrog.artifactory.search.ArtifactSearchResult+json')
+    ;
+
+    $res= $this->rest->execute($search);
+    return Sequence::of($res->data()['results'])
+      ->filter(function($result) { return strstr($result['path'], '.xar'); })
+      ->map(function($result) {
+        $path= explode('/', ltrim($result['path'], '/'));
+        $file= array_pop($path);
+        $version= array_pop($path);
+        $name= array_pop($path);
+        $vendor= implode('.', $path);
+        return $vendor.'/'.$name;
+      })
+    ;
   }
 
   /**
