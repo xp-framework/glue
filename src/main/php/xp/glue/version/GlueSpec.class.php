@@ -30,14 +30,15 @@ class GlueSpec extends RequirementsParser {
    */
   protected function normalize($spec, $offset= 0) {
     $scan= substr($spec, $offset);
-    if (!preg_match('/^([0-9]+)(\.([0-9]+))?(\.([0-9]+))?$/', $scan, $matches)) {
+    if (!preg_match('/^([0-9]+)(\.([0-9]+)(\.([0-9]+))?((alpha|beta|RC|pl)([0-9]+))?)?$/', $scan, $matches)) {
       throw new FormatException('Invalid specifier "'.$scan.'"');
     }
     return sprintf(
-      '%d.%d.%d',
+      '%d.%d.%d%s',
       $matches[1],
       isset($matches[3]) ? $matches[3] : 0,
-      isset($matches[5]) ? $matches[5] : 0
+      isset($matches[5]) ? $matches[5] : 0,
+      isset($matches[6]) ? $matches[6] : ''
     );
   }
 

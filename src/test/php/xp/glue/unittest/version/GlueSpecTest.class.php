@@ -21,11 +21,11 @@ class GlueSpecTest extends \unittest\TestCase {
     $this->fixture= new GlueSpec();
   }
 
-  #[@test]
-  public function exact_version() {
+  #[@test, @values(['1.0.0', '1.0.0RC1', '1.0.0alpha1', '1.0.0beta2', '1.0.9pl5'])]
+  public function exact_version($version) {
     $this->assertEquals(
-      new Requirement(new Equals('1.0.0')),
-      $this->fixture->parse('1.0.0')
+      new Requirement(new Equals($version)),
+      $this->fixture->parse($version)
     );
   }
 
