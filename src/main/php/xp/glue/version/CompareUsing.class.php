@@ -4,6 +4,7 @@
  * Compares a version using a given operator
  * 
  * @see  php://version_compare
+ * @test xp://xp.glue.unittest.version.CompareUsingTest
  */
 class CompareUsing extends Condition {
   protected $op;
