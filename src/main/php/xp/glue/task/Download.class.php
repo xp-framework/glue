@@ -10,6 +10,8 @@ use xp\glue\Dependency;
  * it locally.
  */
 class Download extends Task {
+  const USER_AGENT = 'xp-forge/glue Download 1.0.0';
+
   protected $conn;
   protected $file;
   protected $size;
@@ -54,7 +56,7 @@ class Download extends Task {
     $folder->exists() || $folder->create(0755);
 
     $target= new File($folder, $this->file);
-    $headers= [];
+    $headers= ['User-Agent' => self::USER_AGENT];
     if ($target->exists()) {
       $headers['If-Modified-Since']= gmdate('D, d M Y H:i:s \G\M\T', $target->lastModified());
     }
@@ -62,6 +64,9 @@ class Download extends Task {
 
     if (304 === $response->statusCode()) {
       $status->report($dependency, $this, 304);
+    } else if (in_array($response->statusCode(), [301, 302, 307])) {
+      $redirect= new self(new HttpConnection($response->header('Location')[0]), $this->file, $this->size, $this->sha1);
+      return $redirect->perform($dependency, $folder, $status);
     } else {
       $status->report($dependency, $this, $response->statusCode());
       with ($in= $response->getInputStream(), $out= $target->getOutputStream()); {
