@@ -27,7 +27,8 @@ abstract class Command extends \lang\Object {
     $this->sources= [];
     foreach ($this->conf->readSection('sources') as $name => $url) {
       sscanf($name, '%[^@]@%s', $impl, $spec);
-      $this->sources[]= Package::forName('xp.glue.src')->loadClass(ucfirst($impl))->newInstance($spec, $url);
+      $class= implode('', array_map('ucfirst', explode('-', $impl)));
+      $this->sources[]= Package::forName('xp.glue.src')->loadClass($class)->newInstance($spec, $url);
     }
   }
 
