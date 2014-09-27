@@ -1,12 +1,11 @@
 <?php namespace xp\glue\input;
 
 use io\streams\InputStream;
-use webservices\json\JsonFactory;
-use webservices\json\JsonException;
 use xp\glue\Project;
 use xp\glue\Dependency;
 use xp\glue\version\Requirement;
 use xp\glue\version\GlueSpec;
+use text\json\StreamInput;
 
 /**
  * A gluefile contains project and version information as well as requirements.
@@ -24,14 +23,12 @@ use xp\glue\version\GlueSpec;
  * ```
  */
 class GlueFile extends \lang\Object {
-  protected $json;
   protected $spec;
 
   /**
    * Constructor
    */
   public function __construct() {
-    $this->json= JsonFactory::create();
     $this->spec= new GlueSpec();
   }
 
@@ -66,8 +63,8 @@ class GlueFile extends \lang\Object {
    */
   public function parse(InputStream $in, $source= 'glue.json') {
     try {
-      $config= $this->json->decodeFrom($in);
-    } catch (JsonException $e) {
+      $config= (new StreamInput($in))->read();
+    } catch (FormatException $e) {
       throw new \lang\FormatException('Cannot parse '.$source, $e);
     }
 
