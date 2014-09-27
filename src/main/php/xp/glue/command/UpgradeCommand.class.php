@@ -20,7 +20,7 @@ class UpgradeCommand extends AbstractInstallation {
    */
   protected function dependenciesFor($project, $locked, $args) {
     if (null === $locked) {
-      Console::writeLine('No locked versions found, using project dependencies');
+      Console::writeLine('===> No locked versions found, using project dependencies');
       return $project->dependencies();
     }
 

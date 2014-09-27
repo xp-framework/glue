@@ -2,6 +2,7 @@
 
 use io\Folder;
 use xp\glue\Dependency;
+use util\Objects;
 
 /**
  * Installs dependencies from a given list of sources.
@@ -146,5 +147,14 @@ class Installation extends \lang\Object {
       $paths= array_merge($paths, $this->install($dependency, $target, null, $status));
     }
     return ['paths' => $paths, 'installed' => $this->installed, 'errors' => $this->errors];
+  }
+
+  /**
+   * Creates a string representation
+   *
+   * @return string
+   */
+  public function toString() {
+    return $this->getClassName().'@'.Objects::stringOf($this->dependencies);
   }
 }

@@ -17,6 +17,10 @@ To fetch the dependencies, simply run Glue's *install* command:
 
 ```sh
 $ glue install
+===> Running xp.glue.install.Installation@[
+  xp-forge/mustache => xp.glue.Dependency<xp-forge/mustache@>=1.2.0>
+  xp-framework/core => xp.glue.Dependency<xp-framework/core@>=6.0,<7.0.0>
+]
 xp-forge/mustache @ >=1.2.0: Checkout[local] 1.3.0
 [302 ##########] ->C:\cygwin\home\Timm\devel\xp\mustache\src\main\php\
 [302 ##########] ->C:\cygwin\home\Timm\devel\xp\mustache\src\test\php\
@@ -32,8 +36,8 @@ xp-forge/json @ >=0.8,<1.0.0: Checkout[local] 0.8.3
 [302 ##########] ->C:\cygwin\home\Timm\devel\xp\json\src\test\php\
 
 OK, 2 dependencies processed, 3 modules installed, 10 paths registered, 0 error(s) occured
-Memory used: 1995.46 kB (2075.04 kB peak)
-Time taken: 0.038 seconds
+Memory used: 2013.09 kB (2087.81 kB peak)
+Time taken: 0.025 seconds
 ```
 
 This will fetch the libraries according to the dependency information, place them inside the current directory and adjust the class path accordingly.

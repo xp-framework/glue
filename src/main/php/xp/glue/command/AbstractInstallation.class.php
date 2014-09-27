@@ -133,6 +133,7 @@ abstract class AbstractInstallation extends Command {
     $dependencies= $this->dependenciesFor($this->projectIn($cwd), $this->locksIn($cwd), $args);
     $installation= new Installation($this->sources, $dependencies);
 
+    Console::writeLine('===> Running ', $installation);
     try {
       $installed= $installation->run(new Folder($cwd, 'vendor'), new InstallationStatus(Console::$out));
 

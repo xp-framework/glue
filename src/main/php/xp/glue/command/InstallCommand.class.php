@@ -2,6 +2,7 @@
 
 use xp\glue\Dependency;
 use xp\glue\version\Requirement;
+use util\cmd\Console;
 
 /**
  * Install: Resolves dependencies, downloading and linking as necessary.
@@ -18,8 +19,9 @@ class InstallCommand extends AbstractInstallation {
    */
   protected function dependenciesFor($project, $locked, $args) {
     if (null === $locked) {
-      return $project;
+      return $project->dependencies();
     } else {
+      Console::writeLine('===> Using locked dependencies');
       $dependencies= [];
       foreach ($project->dependencies() as $dep) {
         $module= $dep->module();
