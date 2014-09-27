@@ -5,6 +5,7 @@
     "xp-framework/webservices" : "~6.0",
     "xp-framework/rest"        : "~6.0",
     "xp-framework/http"        : "~6.0",
+    "xp-forge/json"            : ">=0.8",
     "xp-forge/sequence"        : ">=0.7"
   }
 }

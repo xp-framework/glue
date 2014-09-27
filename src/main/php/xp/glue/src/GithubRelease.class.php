@@ -61,6 +61,7 @@ class GithubRelease extends Source {
     ;
     if (!$release->present()) return null;
 
+    $project= null;
     $tasks= [];
     foreach ($release->get()['assets'] as $asset) {
       if ('glue.json' === $asset['name']) {
@@ -81,7 +82,7 @@ class GithubRelease extends Source {
     }
 
     if (null === $project) {
-      throw new \lang\IllegalStateException('Cannot determine project information from artifact '.\xp::stringOf($response));
+      throw new \lang\IllegalStateException('Cannot determine project information from artifact '.\xp::stringOf($release->get()));
     }
     return ['project' => $project, 'tasks' => $tasks];
   }

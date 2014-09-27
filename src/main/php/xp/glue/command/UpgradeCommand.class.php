@@ -12,6 +12,11 @@ use xp\glue\version\Equals;
 use xp\glue\install\Installation;
 use util\profiling\Timer;
 use text\regex\Pattern;
+use text\json\FileOutput;
+use text\json\Types;
+use text\json\WrappedFormat;
+use text\json\Format;
+
 
 /**
  * Upgrade previously installed libraries.
@@ -59,19 +64,13 @@ class UpgradeCommand extends Command {
    * @param  string[] $installed
    */
   protected function createLockFile($cwd, array $installed) {
-    with ($lock= (new File($cwd, 'glue.lock'))->getOutputStream()); {
-      $lock->write("{\n");
-      $s= sizeof($installed);
-      $i= 0;
+    $lock= new FileOutput(new File($cwd, 'glue.lock'), new WrappedFormat('  ', ~Format::ESCAPE_SLASHES));
+    with ($lock->begin(Types::$OBJECT), function($versions) use($installed) {
       foreach ($installed as $module => $def) {
         if (!isset($def['version'])) continue;
-
-        $lock->write('  "'.$module.'": "'.$def['version'].'"');
-        if (++$i < $s) $lock->write(",\n");
+        $versions->pair($module, $def['version']);
       }
-      $lock->write("\n}\n");
-      $lock->close();
-    }
+    });
   }
 
   /**
