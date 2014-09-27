@@ -44,7 +44,6 @@ Open the configuration file and add something along the lines of the following:
 ```ini
 [sources]
 checkout@local="xp-framework@/path/to/devel/xp|xp-forge@/path/to/devel/xp"
-xpbuild@public="http://builds.planet-xp.net/"
 github-release="https://api.github.com/"
 artifactory@idev="https://friebe:******@artifactory.example.com/artifactory/"
 ```
