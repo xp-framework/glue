@@ -1,6 +1,5 @@
 <?php namespace xp\glue\command;
 
-use webservices\json\JsonFactory;
 use util\Properties;
 use lang\reflect\Package;
 
@@ -8,13 +7,8 @@ use lang\reflect\Package;
  * Abstract base class
  */
 abstract class Command extends \lang\Object {
-  protected static $json;
   protected $conf;
   protected $sources= [];
-
-  static function __static() {
-    self::$json= JsonFactory::create();
-  }
 
   /**
    * Configure this command

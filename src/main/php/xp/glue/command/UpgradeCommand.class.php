@@ -12,6 +12,7 @@ use xp\glue\version\Equals;
 use xp\glue\install\Installation;
 use util\profiling\Timer;
 use text\regex\Pattern;
+use text\json\FileInput;
 use text\json\FileOutput;
 use text\json\Types;
 use text\json\WrappedFormat;
@@ -118,7 +119,7 @@ class UpgradeCommand extends Command {
     $cwd= new Folder('.');
     $project= $this->projectIn($cwd);
 
-    $locked= self::$json->decodeFrom((new File($cwd, 'glue.lock'))->getInputStream());
+    $locked= (new FileInput(new File($cwd, 'glue.lock')))->read();
 
     // No arguments: Just update all dependencies. Otherwise only selectively,
     // leaving all others locked.
