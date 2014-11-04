@@ -42,7 +42,7 @@ class Glue extends \lang\Object {
       $command->execute($parsed['args']);
       return 0;
     } catch (\lang\Throwable $e) {
-      Console::$err->writeLine('*** ', ucfirst($method), ': ', $e);
+      Console::$err->writeLine('*** ', ucfirst($parsed['method']), ': ', $e);
       return 1;
     }
   }
