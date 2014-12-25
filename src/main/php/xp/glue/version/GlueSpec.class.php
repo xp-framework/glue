@@ -14,6 +14,7 @@ use lang\FormatException;
  * | `>=1.2,<1.3`      | Use commas to separate multiple conditions applied with a logical **and**. |
  * | `~1.2`            | The next significant release, meaning `>=1.2,<2.0`, so any 1.x version is OK. |
  * | `1.2.*`           | Any version starting with `1.2` matches this wildcard. |
+ * | `dev-master`      | Version match on whatever the "master" branch is at the time of resolution. |
  *
  * @test xp://xp.glue.unittest.version.GlueSpecTest
  * @see  https://getcomposer.org/doc/01-basic-usage.md#package-versions
@@ -30,16 +31,20 @@ class GlueSpec extends RequirementsParser {
    */
   protected function normalize($spec, $offset= 0) {
     $scan= substr($spec, $offset);
-    if (!preg_match('/^([0-9]+)(\.([0-9]+)(\.([0-9]+))?((alpha|beta|RC|pl)([0-9]+))?)?$/', $scan, $matches)) {
-      throw new FormatException('Invalid specifier "'.$scan.'"');
+
+    if (0 === strncmp($scan, 'dev-', 4)) {
+      return $scan;
+    } else if (preg_match('/^([0-9]+)(\.([0-9]+)(\.([0-9]+))?((alpha|beta|RC|pl)([0-9]+))?)?$/', $scan, $matches)) {
+      return sprintf(
+        '%d.%d.%d%s',
+        $matches[1],
+        isset($matches[3]) ? $matches[3] : 0,
+        isset($matches[5]) ? $matches[5] : 0,
+        isset($matches[6]) ? $matches[6] : ''
+      );
     }
-    return sprintf(
-      '%d.%d.%d%s',
-      $matches[1],
-      isset($matches[3]) ? $matches[3] : 0,
-      isset($matches[5]) ? $matches[5] : 0,
-      isset($matches[6]) ? $matches[6] : ''
-    );
+
+    throw new FormatException('Invalid specifier "'.$scan.'"');
   }
 
   /**

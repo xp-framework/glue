@@ -21,7 +21,7 @@ class GlueSpecTest extends \unittest\TestCase {
     $this->fixture= new GlueSpec();
   }
 
-  #[@test, @values(['1.0.0', '1.0.0RC1', '1.0.0alpha1', '1.0.0beta2', '1.0.9pl5'])]
+  #[@test, @values(['1.0.0', '1.0.0RC1', '1.0.0alpha1', '1.0.0beta2', '1.0.9pl5', 'dev-master', 'dev-feature/branch'])]
   public function exact_version($version) {
     $this->assertEquals(
       new Requirement(new Equals($version)),
