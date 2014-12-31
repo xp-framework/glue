@@ -29,19 +29,20 @@ abstract class AbstractInstallation extends Command {
    * @param  io.Folder $cwd
    * @param  string[] $paths
    */
-  protected function createPathFile($cwd, array $paths) {
-    with ($pth= (new File($cwd, 'glue.pth'))->getOutputStream()); {
+  protected function createPathFile($cwd, array $installed) {
+    with ((new File($cwd, 'glue.pth'))->out(), function($out) use($cwd, $installed) {
       $base= $cwd->getURI();
-      foreach ($paths as $path) {
-        if (0 === substr_compare($base, $path, 0, strlen($base))) {
-          $entry= str_replace(DIRECTORY_SEPARATOR, '/', substr($path, strlen($base)));
-        } else {
-          $entry= $path;
+      foreach ($installed as $module => $def) {
+        foreach ($def['paths'] as $path) {
+          if (0 === substr_compare($base, $path, 0, strlen($base))) {
+            $entry= str_replace(DIRECTORY_SEPARATOR, '/', substr($path, strlen($base)));
+          } else {
+            $entry= $path;
+          }
+          $out->write($entry."\n");
         }
-        $pth->write($entry."\n");
       }
-      $pth->close();
-    }
+    });
   }
 
   /**
@@ -137,26 +138,24 @@ abstract class AbstractInstallation extends Command {
     try {
       $installed= $installation->run(new Folder($cwd, 'vendor'), new InstallationStatus(Console::$out));
 
-      $this->createPathFile($cwd, $installed['paths']);
+      $this->createPathFile($cwd, $installed['installed']);
       $this->createLockFile($cwd, $installed['installed']);
 
       if (!empty($installed['errors'])) {
         $result= function() use($dependencies, $installed) {
           Console::writeLinef(
-            "\033[41;1;37mFAIL, %d dependencies processed, %d modules installed, %d paths registered, %d error(s) occured\033[0m",
+            "\033[41;1;37mFAIL, %d dependencies processed, %d modules installed, %d error(s) occured\033[0m",
             sizeof($dependencies),
             sizeof($installed['installed']),
-            sizeof($installed['paths']),
             sizeof($installed['errors'])
           );
         };
       } else {
         $result= function() use($dependencies, $installed) {
           Console::writeLinef(
-            "\033[42;1;37mOK, %d dependencies processed, %d modules installed, %d paths registered, 0 error(s) occured\033[0m",
+            "\033[42;1;37mOK, %d dependencies processed, %d modules installed, 0 error(s) occured\033[0m",
             sizeof($dependencies),
-            sizeof($installed['installed']),
-            sizeof($installed['paths'])
+            sizeof($installed['installed'])
           );
         };
       }

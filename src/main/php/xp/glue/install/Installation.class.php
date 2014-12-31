@@ -94,12 +94,12 @@ class Installation extends \lang\Object {
    * @param  io.Folder $target
    * @param  string $parent
    * @param  xp.glue.InstallationStatus $status
-   * @return string[]
+   * @return bool
    */
   protected function install(Dependency $dependency, Folder $target, $parent, $status) {
     $module= $dependency->module();
-    if (isset($this->errors[$module])) return [];     // Do not try again
-    if (isset($this->installed[$module])) return [];  // Paths already registered
+    if (isset($this->errors[$module])) return true;     // Do not try again
+    if (isset($this->installed[$module])) return true;  // Paths already registered
     $status->enter($dependency);
 
     $this->installed[$module]= ['by' => $parent];
@@ -113,22 +113,22 @@ class Installation extends \lang\Object {
       $vendor= new Folder($target, $dependency->vendor());
       foreach ($resolved['tasks'] as $i => $task) {
         $status->start($dependency, $task);
-        $paths[]= $task->perform($dependency, $vendor, $status);
+        $this->installed[$module]['paths']= (array)$task->perform($dependency, $vendor, $status);
         $status->stop($dependency, $task);
       }
 
-      return array_merge($paths, $this->register(
+      return $this->register(
         $module,
         $resolved['project']->dependencies(),
         $target,
         $status
-      ));
+      );
     }
 
     unset($this->installed[$module]);
     $this->errors[$module]= new NotFound($this->sources);
     $status->error($dependency, $this->errors[$module]);
-    return [];
+    return false;
   }
 
   /**
@@ -144,9 +144,9 @@ class Installation extends \lang\Object {
     $paths= [];
     $status || $status= self::$NO_STATUS;
     foreach ($this->dependencies as $dependency) {
-      $paths= array_merge($paths, $this->install($dependency, $target, null, $status));
+      $this->install($dependency, $target, null, $status);
     }
-    return ['paths' => $paths, 'installed' => $this->installed, 'errors' => $this->errors];
+    return ['installed' => $this->installed, 'errors' => $this->errors];
   }
 
   /**
