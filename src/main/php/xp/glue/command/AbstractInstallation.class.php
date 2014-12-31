@@ -27,12 +27,12 @@ abstract class AbstractInstallation extends Command {
    * Creates a .pth file. Uses relative path entries whenever possible.
    *
    * @param  io.Folder $cwd
-   * @param  string[] $paths
+   * @param  [:var] $result
    */
-  protected function createPathFile($cwd, array $installed) {
-    with ((new File($cwd, 'glue.pth'))->out(), function($out) use($cwd, $installed) {
+  protected function createPathFile($cwd, array $result) {
+    with ((new File($cwd, 'glue.pth'))->out(), function($out) use($cwd, $result) {
       $base= $cwd->getURI();
-      foreach ($installed as $module => $def) {
+      foreach ($result as $module => $def) {
         foreach ($def['paths'] as $path) {
           if (0 === substr_compare($base, $path, 0, strlen($base))) {
             $entry= str_replace(DIRECTORY_SEPARATOR, '/', substr($path, strlen($base)));
@@ -50,12 +50,12 @@ abstract class AbstractInstallation extends Command {
    *
    * @param  io.File $file
    * @param  io.Folder $cwd
-   * @param  string[] $installed
+   * @param  [:var] $result
    */
-  protected function createLockFile($cwd, array $installed) {
+  protected function createLockFile($cwd, array $result) {
     $lock= new FileOutput(new File($cwd, 'glue.lock'), new WrappedFormat('  ', ~Format::ESCAPE_SLASHES));
-    with ($lock->begin(Types::$OBJECT), function($versions) use($installed) {
-      foreach ($installed as $module => $def) {
+    with ($lock->begin(Types::$OBJECT), function($versions) use($result) {
+      foreach ($result as $module => $def) {
         if (!isset($def['version'])) continue;
         $versions->pair($module, $def['version']);
       }
@@ -136,26 +136,26 @@ abstract class AbstractInstallation extends Command {
 
     Console::writeLine('===> Running ', $installation);
     try {
-      $installed= $installation->run(new Folder($cwd, 'vendor'), new InstallationStatus(Console::$out));
+      $result= $installation->run(new Folder($cwd, 'vendor'), new InstallationStatus(Console::$out));
 
-      $this->createPathFile($cwd, $installed['installed']);
-      $this->createLockFile($cwd, $installed['installed']);
+      $this->createPathFile($cwd, $result['installed']);
+      $this->createLockFile($cwd, $result['installed']);
 
-      if (!empty($installed['errors'])) {
-        $result= function() use($dependencies, $installed) {
+      if (!empty($result['errors'])) {
+        $result= function() use($dependencies, $result) {
           Console::writeLinef(
             "\033[41;1;37mFAIL, %d dependencies processed, %d modules installed, %d error(s) occured\033[0m",
             sizeof($dependencies),
-            sizeof($installed['installed']),
-            sizeof($installed['errors'])
+            sizeof($result['installed']),
+            sizeof($result['errors'])
           );
         };
       } else {
-        $result= function() use($dependencies, $installed) {
+        $result= function() use($dependencies, $result) {
           Console::writeLinef(
             "\033[42;1;37mOK, %d dependencies processed, %d modules installed, 0 error(s) occured\033[0m",
             sizeof($dependencies),
-            sizeof($installed['installed'])
+            sizeof($result['installed'])
           );
         };
       }
