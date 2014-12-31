@@ -68,6 +68,7 @@ class Packagist extends Source {
       try {
         $selected= Sequence::of($stream->read()['packages'][$dependency->module()])
           ->filter($matches)
+          ->sorted(function($a, $b) { return version_compare($b['version_normalized'], $a['version_normalized']); })
           ->first()
         ;
       } catch (IndexOutOfBoundsException $e) {
