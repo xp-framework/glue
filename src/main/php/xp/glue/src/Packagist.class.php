@@ -19,6 +19,8 @@ use lang\FormatException;
  * @see  https://packagist.org/
  */
 class Packagist extends Source {
+  const VER = 'version_normalized';
+
   protected $conn;
 
   /**
@@ -68,7 +70,7 @@ class Packagist extends Source {
       try {
         $selected= Sequence::of($stream->read()['packages'][$dependency->module()])
           ->filter($matches)
-          ->sorted(function($a, $b) { return version_compare($b['version_normalized'], $a['version_normalized']); })
+          ->sorted(function($a, $b) { return version_compare($b[self::VER], $a[self::VER]); })
           ->first()
         ;
       } catch (IndexOutOfBoundsException $e) {
@@ -92,7 +94,7 @@ class Packagist extends Source {
         $tasks= [
           new Autoloader($package['autoload'], new ZipDownload(
             new HttpConnection($package['dist']['url']),
-            $dependency->name().'-'.$package['version_normalized'])
+            $dependency->name().'-'.$package[self::VER])
           )
         ];
 
